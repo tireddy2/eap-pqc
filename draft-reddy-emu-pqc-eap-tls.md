@@ -3,7 +3,7 @@ title: "Post-Quantum Cryptography Recommendations for EAP-TLS and EAP-TTLS"
 abbrev: "PQC Recommendations for EAP-TLS/TTLS"
 category: std
 
-docname: draft-reddy-emu-pqc-eap-tls
+docname: draft-reddy-emu-pqc-eap-tls-latest
 submissiontype: IETF
 number:
 date:
