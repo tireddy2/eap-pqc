@@ -10,7 +10,7 @@ date:
 consensus: true
 v: 3
 area: "Security"
-workgroup: "EMU"
+workgroup: "EAP Method Update"
 keyword:
  - PQC
  - PQ/T Hybrid
@@ -18,10 +18,10 @@ keyword:
  - EAP
 
 venue:
-  group: "emu"
+  group: "EAP Method Update"
   type: "Working Group"
   mail: "emu@ietf.org"
-  arch: "https://mailarchive.ietf.org/arch/browse/emu/"
+  arch: "https://mailarchive.ietf.org/arch/browse/emu"
 
 
 stand_alone: yes
@@ -82,7 +82,7 @@ Digital signature algorithms play a critical role in X.509 certificates, Certifi
 
 # Data Confidentiality in EAP-TLS {#confident}
 
-One of the primary threats to EAP-TLS and EAP-TTLS is the HNDL attack. In this scenario, adversaries can passively capture EAP-TLS handshakes such as those transmitted over the air in Wi-Fi networks and store them for future decryption once CRQCs become available. 
+One of the primary threats to EAP-TLS and EAP-TTLS is the HNDL attack. In this scenario, adversaries can passively capture EAP-TLS handshakes such as those transmitted over the air in Wi-Fi networks and store them for future decryption once CRQCs become available.
 
 While EAP-TLS 1.3 {{RFC9190}} was designed to provide strong forward secrecy and protect user privacy by encrypting client identity and reducing exposure of session metadata, HNDL attacks effectively nullify these protections. If the handshake is not quantum-resistant, a future CRQC could retroactively decrypt session traffic, revealing:
 
@@ -104,7 +104,7 @@ This makes PQC authentication a critical requirement for EAP-TLS and EAP-TTLS de
 
 To mitigate these risks, EAP-TLS and EAP-TTLS deployments MUST adopt either pure PQ or PQ/T certificate-based authentication, as described in {{Section 5 of I-D.reddy-uta-pqc-app}}.
 
-A composite certificate contains both a traditional public key algorithm (e.g., ECDSA) and a post-quantum algorithm (e.g., ML-DSA) within a single X.509 certificate. This design enables both algorithms to be used in parallel, the traditional component ensures compatibility with existing infrastructure, while the post-quantum component introduces resistance against future quantum attacks. This approach facilitates early adoption of PQC without requiring immediate disruption to established PKI deployments. 
+A composite certificate contains both a traditional public key algorithm (e.g., ECDSA) and a post-quantum algorithm (e.g., ML-DSA) within a single X.509 certificate. This design enables both algorithms to be used in parallel, the traditional component ensures compatibility with existing infrastructure, while the post-quantum component introduces resistance against future quantum attacks. This approach facilitates early adoption of PQC without requiring immediate disruption to established PKI deployments.
 
 The use of post-quantum or hybrid certificates increases the size of individual certificates, certificate chains, and signatures, resulting in significantly larger handshake messages. These larger payloads can lead to packet fragmentation, retransmissions, and handshake delays, issues that are particularly disruptive in constrained or lossy network environments.
 
@@ -114,7 +114,7 @@ To address these impacts, EAP-TLS deployments can apply certificate chain optimi
 
 To reduce handshake overhead further and suppress the transmission of intermediate certificates, especially important when certificate chains become large due to PQC or composite certificates, this draft leverages the Enrollment over Secure Transport (EST) protocol {{RFC7030}} as extended by EST extensions {{RFC8295}}.
 
-This section defines extensions to EST to support retrieval of the certificate chain used by a EAP server and EAP clients. The first extension enables clients to obtain access to the complete set of published intermediate certificates of the EAP server. 
+This section defines extensions to EST to support retrieval of the certificate chain used by a EAP server and EAP clients. The first extension enables clients to obtain access to the complete set of published intermediate certificates of the EAP server.
 
 A new path component is defined under the EST well-known URI:
 
@@ -135,7 +135,7 @@ GET /.well-known/est/eapclientcertchain
 The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.
 
 After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in {{!I-D.kampanakis-tls-scas}} with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message.
-   
+
 # Security Considerations
 
 The security considerations outlined in {{?I-D.reddy-uta-pqc-app}} and {{?I-D.ietf-pquip-pqc-engineers}} must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.
