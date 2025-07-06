@@ -1,0 +1,97 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2025-07-06T02:12:01.114906+00:00",
+  "repo": "tireddy2/eap-pqc",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOPGMMNc6dVq9S",
+      "title": "fix reference to draft-kampanakis-tls-scas which has goofy suffix of \u2026",
+      "url": "https://github.com/tireddy2/eap-pqc/pull/1",
+      "state": "MERGED",
+      "author": "danwing",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "\u2026-latest; fix spelling of underpin->underpins",
+      "createdAt": "2025-07-03T21:27:28Z",
+      "updatedAt": "2025-07-04T05:46:49Z",
+      "baseRepository": "tireddy2/eap-pqc",
+      "baseRefName": "main",
+      "baseRefOid": "94b9626218ff99e203ae924db1171225d3404cea",
+      "headRepository": "danwing/eap-pqc",
+      "headRefName": "patch-1",
+      "headRefOid": "9e57c251e599ccbafd3b3d0e66e6e61bc4778cd2",
+      "closedAt": "2025-07-04T05:46:49Z",
+      "mergedAt": "2025-07-04T05:46:49Z",
+      "mergedBy": "tireddy2",
+      "mergeCommit": {
+        "oid": "a067b38e2952248eb977799832fad74d82c2c895"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOPGMMNc6x9b_V",
+          "commit": {
+            "abbreviatedOid": "9e57c25"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-07-04T05:46:26Z",
+          "updatedAt": "2025-07-04T05:46:26Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
+}
