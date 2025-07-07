@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                             4 July 2025
-Expires: 5 January 2026
+Intended status: Standards Track                             7 July 2025
+Expires: 8 January 2026
 
 
            Post-Quantum Enhancements to EAP-TLS and EAP-TTLS
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 January 2026.
+   This Internet-Draft will expire on 8 January 2026.
 
 Copyright Notice
 
@@ -239,8 +239,8 @@ Table of Contents
    handshake delays, issues that are particularly disruptive in
    constrained or lossy network environments.
 
-   To address these impacts, EAP-TLS deployments can apply certificate
-   chain optimization techniques outlined in Section 6.1 of
+   To address these impacts, EAP-TLS and EAP-TTLS deployments can apply
+   certificate chain optimization techniques outlined in Section 6.1 of
    [I-D.reddy-uta-pqc-app] to reduce transmission overhead and improve
    handshake reliability.
 
@@ -294,7 +294,10 @@ Table of Contents
    its ClientHello message.  Similarly, a EAP server that believes it
    has a complete set of intermediate certificates to authenticate the
    EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in
-   its CertificateRequest message.
+   its CertificateRequest message.  In both cases, only the end-entity
+   certificates will be provided by the EAP client and server during the
+   TLS handshake, relying on the recipient to possess or retrieve the
+   necessary intermediate certificates for certificate chain validation.
 
 6.  Security Considerations
 
@@ -310,13 +313,12 @@ References
 
 Normative References
 
-   [I-D.kampanakis-tls-scas-latest]
-              Kampanakis, P., Bytheway, C., Westerbaan, B., and M.
-              Thomson, "Suppressing CA Certificates in TLS 1.3", Work in
-              Progress, Internet-Draft, draft-kampanakis-tls-scas-
-              latest-03, 5 January 2023,
-              <https://datatracker.ietf.org/doc/html/draft-kampanakis-
-              tls-scas-latest-03>.
+   [I-D.reddy-uta-pqc-app]
+              Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
+              Recommendations for TLS-based Applications", Work in
+              Progress, Internet-Draft, draft-reddy-uta-pqc-app-08, 2
+              July 2025, <https://datatracker.ietf.org/doc/html/draft-
+              reddy-uta-pqc-app-08>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -358,12 +360,13 @@ Informative References
               January 2025, <https://datatracker.ietf.org/doc/html/
               draft-ietf-pquip-pqt-hybrid-terminology-06>.
 
-   [I-D.reddy-uta-pqc-app]
-              Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
-              Recommendations for TLS-based Applications", Work in
-              Progress, Internet-Draft, draft-reddy-uta-pqc-app-08, 2
-              July 2025, <https://datatracker.ietf.org/doc/html/draft-
-              reddy-uta-pqc-app-08>.
+   [I-D.kampanakis-tls-scas-latest]
+              Kampanakis, P., Bytheway, C., Westerbaan, B., and M.
+              Thomson, "Suppressing CA Certificates in TLS 1.3", Work in
+              Progress, Internet-Draft, draft-kampanakis-tls-scas-
+              latest-03, 5 January 2023,
+              <https://datatracker.ietf.org/doc/html/draft-kampanakis-
+              tls-scas-latest-03>.
 
    [RFC9191]  Sethi, M., Preuß Mattsson, J., and S. Turner, "Handling
               Large Certificates and Long Certificate Chains in TLS-
@@ -377,4 +380,4 @@ Author's Address
    Bangalore
    Karnataka
    India
-   Email: kondtir@gmail.com
+   Email: k.tirumaleswar_reddy@nokia.com
