@@ -34,7 +34,7 @@ author:
     city: Bangalore
     region: Karnataka
     country: India
-    email: "kondtir@gmail.com"
+    email: "k.tirumaleswar_reddy@nokia.com"
 
 
 
@@ -92,9 +92,9 @@ While EAP-TLS 1.3 {{RFC9190}} was designed to provide strong forward secrecy and
 
    * Session-specific metadata that may aid surveillance or profiling, such as cipher suites and TLS extensions supported. These elements can help to fingerprint devices, or correlate EAP-TLS sessions over time.
 
-To preserve the intended privacy guarantees of TLS 1.3 and protect against HNDL, EAP-TLS and EAP-TTLS deployments MUST adopt post-quantum key exchange mechanisms, as outlined in Section 4 of {{?I-D.reddy-uta-pqc-app}}. These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.
+To preserve the intended privacy guarantees of TLS 1.3 and protect against HNDL, EAP-TLS and EAP-TTLS deployments MUST adopt post-quantum key exchange mechanisms, as outlined in Section 4 of {{!I-D.reddy-uta-pqc-app}}. These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.
 
-Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of {{?I-D.reddy-uta-pqc-app}} to minimize performance overhead.
+Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of {{I-D.reddy-uta-pqc-app}} to minimize performance overhead.
 
 # Post-Quantum Authentication in EAP-TLS {#eaptls-authentication}
 
@@ -108,7 +108,7 @@ A composite certificate contains both a traditional public key algorithm (e.g., 
 
 The use of post-quantum or hybrid certificates increases the size of individual certificates, certificate chains, and signatures, resulting in significantly larger handshake messages. These larger payloads can lead to packet fragmentation, retransmissions, and handshake delays, issues that are particularly disruptive in constrained or lossy network environments.
 
-To address these impacts, EAP-TLS deployments can apply certificate chain optimization techniques outlined in Section 6.1 of {{?I-D.reddy-uta-pqc-app}} to reduce transmission overhead and improve handshake reliability.
+To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate chain optimization techniques outlined in Section 6.1 of {{I-D.reddy-uta-pqc-app}} to reduce transmission overhead and improve handshake reliability.
 
 # EST Integration {#ext-extn}
 
@@ -134,11 +134,11 @@ GET /.well-known/est/eapclientcertchain
 
 The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.
 
-After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in {{!I-D.kampanakis-tls-scas-latest}} with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message.
+After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in {{?I-D.kampanakis-tls-scas-latest}} with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message. In both cases, only the end-entity certificates will be provided by the EAP client and server during the TLS handshake, relying on the recipient to possess or retrieve the necessary intermediate certificates for certificate chain validation.
 
 # Security Considerations
 
-The security considerations outlined in {{?I-D.reddy-uta-pqc-app}} and {{?I-D.ietf-pquip-pqc-engineers}} must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.
+The security considerations outlined in {{I-D.reddy-uta-pqc-app}} and {{?I-D.ietf-pquip-pqc-engineers}} must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.
 
 # Acknowledgements
 {:numbered="false"}
