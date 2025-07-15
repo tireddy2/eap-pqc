@@ -134,6 +134,10 @@ GET /.well-known/est/eapclientcertchain
 
 The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.
 
+Both EAP servers and clients MAY cache the retrieved certificate chains but SHOULD implement mechanisms to detect changes or expiration. These include periodic re-fetching, honoring HTTP cache control headers (e.g., Cache-Control, ETag), or checking the validity period of the intermediate certificates themselves.
+
+As an alternative, a device MAY attempt to retrieve the certificate chain from the EST server (e.g., /eapservercertchain or /eapclientcertchain) only when certificate validation fails during an EAP-TLS or EAP-TTLS handshake. While this on-demand retrieval can serve as a fallback to recover from outdated intermediate certificate, it has the drawback of delaying authentication.
+
 After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in {{?I-D.kampanakis-tls-scas-latest}} with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message. In both cases, only the end-entity certificates will be provided by the EAP client and server during the TLS handshake, relying on the recipient to possess or retrieve the necessary intermediate certificates for certificate chain validation.
 
 # Security Considerations
