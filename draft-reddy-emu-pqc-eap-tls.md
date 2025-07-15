@@ -134,7 +134,7 @@ GET /.well-known/est/eapclientcertchain
 
 The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.
 
-Both EAP servers and clients MAY cache the retrieved certificate chains but SHOULD implement mechanisms to detect changes or expiration. These include periodic re-fetching, honoring HTTP cache control headers (e.g., Cache-Control, ETag), or checking the validity period of the intermediate certificates themselves.
+EAP servers and clients are RECOMMENDED to cache retrieved certificate chains to reduce latency and network overhead. However, they SHOULD implement mechanisms to detect changes or expiration. These include periodic re-fetching, honoring HTTP cache control headers (e.g., Cache-Control, ETag), and verifying the validity period of intermediate certificates.
 
 As an alternative, a device MAY attempt to retrieve the certificate chain from the EST server (e.g., /eapservercertchain or /eapclientcertchain) only when certificate validation fails during an EAP-TLS or EAP-TTLS handshake. While this on-demand retrieval can serve as a fallback to recover from outdated intermediate certificate, it has the drawback of delaying authentication.
 
