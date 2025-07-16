@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                            15 July 2025
-Expires: 16 January 2026
+Intended status: Standards Track                            16 July 2025
+Expires: 17 January 2026
 
 
            Post-Quantum Enhancements to EAP-TLS and EAP-TTLS
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 January 2026.
+   This Internet-Draft will expire on 17 January 2026.
 
 Copyright Notice
 
@@ -180,11 +180,6 @@ Table of Contents
    *  Client credentials used in certificate-based authentication (e.g.,
       usernames, device or organization identifiers).
 
-   *  Session-specific metadata that may aid surveillance or profiling,
-      such as cipher suites and TLS extensions supported.  These
-      elements can help to fingerprint devices, or correlate EAP-TLS
-      sessions over time.
-
    To preserve the intended privacy guarantees of TLS 1.3 and protect
    against HNDL, EAP-TLS and EAP-TTLS deployments MUST adopt post-
    quantum key exchange mechanisms, as outlined in Section 4 of
@@ -246,6 +241,15 @@ Table of Contents
 
 5.  EST Integration
 
+   The EAP-client is expected to validate the certificate presented by
+   the EAP-server using a trust anchor that is provisioned out-of-band
+   prior to authentication (e.g., using EST).  The Intermediate
+   certificates are provided by the EAP server during the EAP-TLS
+   handshake.  The EAP client relies solely on the pre-provisioned trust
+   anchor to build and validate the certificate chain.  This model
+   assumes a managed deployment environment with explicitly configured
+   trust relationships between the EAP-client and EAP-server.
+
    To reduce handshake overhead further and suppress the transmission of
    intermediate certificates, especially important when certificate
    chains become large due to PQC or composite certificates, this draft
@@ -272,7 +276,9 @@ Table of Contents
 
    The second extension enables EAP servers to obtain access to the
    complete set of published intermediate certificates of the EAP
-   clients.
+   clients.  Rather than relying on static configuration, the EAP server
+   can dynamically fetch the client's intermediate certificate chain
+   from a trusted EST server within the same administrative domain.
 
    A new path component is defined under the EST well-known URI:
 
