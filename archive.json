@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-15T02:11:52.613641+00:00",
+  "timestamp": "2025-07-17T02:09:09.089996+00:00",
   "repo": "tireddy2/eap-pqc",
   "labels": [
     {
@@ -92,6 +92,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOPGMMNc6e6f_b",
+      "title": "Update to address comments from the WG",
+      "url": "https://github.com/tireddy2/eap-pqc/pull/2",
+      "state": "OPEN",
+      "author": "tireddy2",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-07-15T05:44:36Z",
+      "updatedAt": "2025-07-16T11:55:43Z",
+      "baseRepository": "tireddy2/eap-pqc",
+      "baseRefName": "main",
+      "baseRefOid": "451b53ca1183fea2ecd66a7b6ffcdba3ad173dd4",
+      "headRepository": "tireddy2/eap-pqc",
+      "headRefName": "tireddy2-patch-1",
+      "headRefOid": "8914c633e25e33ed0e3805bd0459c3122725e239",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
