@@ -112,7 +112,7 @@ To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate
 
 The EAP-client is expected to validate the certificate presented by the EAP-server using a trust anchor that is provisioned out-of-band prior to authentication (e.g., using EST). The Intermediate certificates are provided by the EAP server during the EAP-TLS handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and validate the certificate chain. This model assumes a managed deployment environment with explicitly configured trust relationships between the EAP-client and EAP-server.
 
-To reduce handshake overhead further and suppress the transmission of intermediate certificates, especially important when certificate chains become large due to PQC or composite certificates, this draft leverages the Enrollment over Secure Transport (EST) protocol {{RFC7030}} as extended by EST extensions {{RFC8295}}.
+To further reduce handshake overhead, particularly in deployments using large certificate chains due to post-quantum (PQ) or composite certificates, this draft proposes an optimization that leverages the Enrollment over Secure Transport (EST) protocol {{RFC7030}}, extended by {{RFC8295}}. Specifically, it allows intermediate certificates to be retrieved in advance by using EST, thereby avoiding the need to transmit them during each EAP-TLS exchange.
 
 This section defines extensions to EST to support retrieval of the certificate chain used by a EAP server and EAP clients. The first extension enables clients to obtain access to the complete set of published intermediate certificates of the EAP server.
 
