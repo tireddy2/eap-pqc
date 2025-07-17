@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                            16 July 2025
-Expires: 17 January 2026
+Intended status: Standards Track                            17 July 2025
+Expires: 18 January 2026
 
 
            Post-Quantum Enhancements to EAP-TLS and EAP-TTLS
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 January 2026.
+   This Internet-Draft will expire on 18 January 2026.
 
 Copyright Notice
 
@@ -250,11 +250,13 @@ Table of Contents
    assumes a managed deployment environment with explicitly configured
    trust relationships between the EAP-client and EAP-server.
 
-   To reduce handshake overhead further and suppress the transmission of
-   intermediate certificates, especially important when certificate
-   chains become large due to PQC or composite certificates, this draft
-   leverages the Enrollment over Secure Transport (EST) protocol
-   [RFC7030] as extended by EST extensions [RFC8295].
+   To further reduce handshake overhead, particularly in deployments
+   using large certificate chains due to post-quantum (PQ) or composite
+   certificates, this draft proposes an optimization that leverages the
+   Enrollment over Secure Transport (EST) protocol [RFC7030], extended
+   by [RFC8295].  Specifically, it allows intermediate certificates to
+   be retrieved in advance by using EST, thereby avoiding the need to
+   transmit them during each EAP-TLS exchange.
 
    This section defines extensions to EST to support retrieval of the
    certificate chain used by a EAP server and EAP clients.  The first
