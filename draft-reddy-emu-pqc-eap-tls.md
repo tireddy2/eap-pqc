@@ -90,8 +90,6 @@ While EAP-TLS 1.3 {{RFC9190}} was designed to provide strong forward secrecy and
 
    * Client credentials used in certificate-based authentication (e.g., usernames, device or organization identifiers).
 
-   * Session-specific metadata that may aid surveillance or profiling, such as cipher suites and TLS extensions supported. These elements can help to fingerprint devices, or correlate EAP-TLS sessions over time.
-
 To preserve the intended privacy guarantees of TLS 1.3 and protect against HNDL, EAP-TLS and EAP-TTLS deployments MUST adopt post-quantum key exchange mechanisms, as outlined in Section 4 of {{!I-D.reddy-uta-pqc-app}}. These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.
 
 Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of {{I-D.reddy-uta-pqc-app}} to minimize performance overhead.
@@ -112,7 +110,9 @@ To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate
 
 # EST Integration {#ext-extn}
 
-To reduce handshake overhead further and suppress the transmission of intermediate certificates, especially important when certificate chains become large due to PQC or composite certificates, this draft leverages the Enrollment over Secure Transport (EST) protocol {{RFC7030}} as extended by EST extensions {{RFC8295}}.
+The EAP-client is expected to validate the certificate presented by the EAP-server using a trust anchor that is provisioned out-of-band prior to authentication (e.g., using EST). The Intermediate certificates are provided by the EAP server during the EAP-TLS handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and validate the certificate chain. This model assumes a managed deployment environment with explicitly configured trust relationships between the EAP-client and EAP-server.
+
+To further reduce handshake overhead, particularly in deployments using large certificate chains due to post-quantum (PQ) or composite certificates, this draft proposes an optimization that leverages the Enrollment over Secure Transport (EST) protocol {{RFC7030}}, extended by {{RFC8295}}. Specifically, it allows intermediate certificates to be retrieved in advance by using EST, thereby avoiding the need to transmit them during each EAP-TLS exchange.
 
 This section defines extensions to EST to support retrieval of the certificate chain used by a EAP server and EAP clients. The first extension enables clients to obtain access to the complete set of published intermediate certificates of the EAP server.
 
@@ -124,7 +124,7 @@ GET /.well-known/est/eapservercertchain
 
 The '/eapservercertchain' is intended for informational retrieval only and does not require client authentication. It allows clients to retrieve the intermediate certificate chain that the EAP server presents during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP server uses in a EAP-TLS or EAP-TTLS session.
 
-The second extension enables EAP servers to obtain access to the complete set of published intermediate certificates of the EAP clients.
+The second extension enables EAP servers to obtain access to the complete set of published intermediate certificates of the EAP clients. Rather than relying on static configuration, the EAP server can dynamically fetch the client's intermediate certificate chain from a trusted EST server within the same administrative domain.
 
 A new path component is defined under the EST well-known URI:
 
@@ -133,6 +133,10 @@ GET /.well-known/est/eapclientcertchain
 ~~~
 
 The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server MUST support requests without requiring client authentication. The certificate chain provided by the EST server MUST be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.
+
+EAP servers and clients are RECOMMENDED to cache retrieved certificate chains to reduce latency and network overhead. However, they SHOULD implement mechanisms to detect changes or expiration. These include periodic re-fetching, honoring HTTP cache control headers (e.g., Cache-Control, ETag), and verifying the validity period of intermediate certificates.
+
+As an alternative, a device MAY attempt to retrieve the certificate chain from the EST server (e.g., /eapservercertchain or /eapclientcertchain) only when certificate validation fails during an EAP-TLS or EAP-TTLS handshake. While this on-demand retrieval can serve as a fallback to recover from outdated intermediate certificate, it has the drawback of delaying authentication.
 
 After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in {{?I-D.kampanakis-tls-scas-latest}} with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message. In both cases, only the end-entity certificates will be provided by the EAP client and server during the TLS handshake, relying on the recipient to possess or retrieve the necessary intermediate certificates for certificate chain validation.
 
