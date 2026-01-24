@@ -50,7 +50,7 @@ informative:
 --- abstract
 
 
-This document proposes enhancements to the Extensible Authentication Protocol with Transport Layer Security (EAP-TLS) and EAP Tunneled TLS (EAP-TTLS) to incorporate post-quantum cryptographic mechanisms. It also addresses challenges related to large certificate sizes and long certificate chains, as identified in RFC9191, and provides recommendations for integrating PQC algorithms into EAP-TLS and EAP-TTLS deployments.
+This document proposes enhancements to the Extensible Authentication Protocol with Transport Layer Security (EAP-TLS) and EAP Tunneled TLS (EAP-TTLS) to incorporate post-quantum cryptographic mechanisms. It also addresses challenges related to large certificate sizes and long certificate chains, as identified in {{?RFC9191}}, and provides recommendations for integrating PQC algorithms into EAP-TLS and EAP-TTLS deployments.
 
 --- middle
 
@@ -84,29 +84,31 @@ Digital signature algorithms play a critical role in X.509 certificates, Certifi
 
 One of the primary threats to EAP-TLS and EAP-TTLS is the HNDL attack. In this scenario, adversaries can passively capture EAP-TLS handshakes such as those transmitted over the air in Wi-Fi networks and store them for future decryption once CRQCs become available.
 
-While EAP-TLS 1.3 {{RFC9190}} was designed to provide strong forward secrecy and protect user privacy by encrypting client identity and reducing exposure of session metadata, HNDL attacks effectively nullify these protections. If the handshake is not quantum-resistant, a future CRQC could retroactively decrypt session traffic, revealing:
+While EAP-TLS 1.3 {{RFC9190}} provides forward secrecy through ephemeral key exchange and improves privacy by encrypting client identity and reducing exposure of session metadata, these protections rely on the security of the underlying key exchange algorithm. In the presence of a CRQC, traditional key exchange mechanisms (e.g., ECDHE) would no longer provide long-term confidentiality. In such cases, an adversary could mount a HDNL attack by passively recording EAP-TLS handshakes and decrypting the captured traffic once quantum-capable cryptanalysis becomes feasible. This could retroactively expose information that TLS 1.3 is otherwise designed to protect, including:
 
    * The identity of the authenticated client.
 
    * Client credentials used in certificate-based authentication (e.g., usernames, device or organization identifiers).
 
-To preserve the intended privacy guarantees of TLS 1.3 and protect against HNDL, EAP-TLS and EAP-TTLS deployments MUST adopt post-quantum key exchange mechanisms, as outlined in Section 4 of {{!I-D.reddy-uta-pqc-app}}. These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.
+To preserve the intended privacy guarantees of TLS 1.3 and to protect against HDNL attacks, EAP-TLS and EAP-TTLS deployments that require long-term confidentiality will need to adopt post-quantum key exchange mechanisms, as outlined in Section 4 of {{!I-D.ietf-uta-pqc-app}}.
 
-Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of {{I-D.reddy-uta-pqc-app}} to minimize performance overhead.
+These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.
+
+Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of {{I-D.ietf-uta-pqc-app}} to minimize performance overhead.
 
 # Post-Quantum Authentication in EAP-TLS {#eaptls-authentication}
 
-Although CRQCs could eventually decrypt recorded TLS sessions to recover derived keys and access confidential data, they cannot retroactively compromise client or server authentication if the attacker did not possess the corresponding private key at the time of the handshake. However, EAP-TLS and EAP-TTLS deployments rely on X.509 certificates issued by certificate authorities (CAs), and the transition to post-quantum (PQ) authentication is constrained by the long lifecycle involved to distribute, deploy, and validate new trust anchors. If CRQCs arrive sooner than anticipated, authentication systems may lack the agility to adapt in time.
+Although a CRQC would primarily impact the confidentiality of recorded TLS sessions, it could also pose risks to authentication mechanisms that rely on traditional public-key algorithms with long-lived credentials. In particular, if quantum-capable cryptanalysis were to become practical within the validity period of a certificate, an adversary could recover the private key corresponding to a traditionally signed certificate and subsequently impersonate the certificate holder in real time. The feasibility and impact of such attacks depend on several factors, including certificate lifetimes and key management practices.
 
-This makes PQC authentication a critical requirement for EAP-TLS and EAP-TTLS deployments deployments. An on-path attacker equipped with a CRQC could compute a server’s private key before the certificate expires, enabling real-time impersonation of access points (APs). This could deceive users into revealing credentials or connecting to rogue networks, leading to privacy violations and potential client credential theft.
+EAP-TLS and EAP-TTLS deployments rely on X.509 certificates issued by CAs, and the transition to PQ certificate authentication is constrained by the long lifecycle associated with distributing, deploying, and validating new trust anchors. If CRQCs arrive sooner than anticipated, deployed authentication systems may lack the agility to transition credentials and trust anchors in a timely manner.
 
-To mitigate these risks, EAP-TLS and EAP-TTLS deployments MUST adopt either pure PQ or PQ/T certificate-based authentication, as described in {{Section 5 of I-D.reddy-uta-pqc-app}}.
+As a result, deployments that rely on long-lived certificates or that require resistance to future quantum-capable adversaries face an increased risk of authentication compromise. In such scenarios, an on-path attacker that is able to recover a server’s private key within the certificate validity period could impersonate access points (APs) in real time, potentially deceiving users into revealing credentials or connecting to rogue networks.
 
-A composite certificate contains both a traditional public key algorithm (e.g., ECDSA) and a post-quantum algorithm (e.g., ML-DSA) within a single X.509 certificate. This design enables both algorithms to be used in parallel, the traditional component ensures compatibility with existing infrastructure, while the post-quantum component introduces resistance against future quantum attacks. This approach facilitates early adoption of PQC without requiring immediate disruption to established PKI deployments.
+To mitigate these risks, EAP-TLS and EAP-TTLS deployments will need to adopt, over time, either PQ or PQ/T hybrid certificate-based authentication, as described in {{Section 5 of I-D.ietf-uta-pqc-app}}.
 
-The use of post-quantum or hybrid certificates increases the size of individual certificates, certificate chains, and signatures, resulting in significantly larger handshake messages. These larger payloads can lead to packet fragmentation, retransmissions, and handshake delays, issues that are particularly disruptive in constrained or lossy network environments.
+The use of PQ or PQ/T hybrid certificates increases the size of individual certificates, certificate chains, and signatures, resulting in significantly larger handshake messages. These larger payloads can lead to packet fragmentation, retransmissions, and handshake delays, issues that are particularly disruptive in constrained or lossy network environments.
 
-To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate chain optimization techniques outlined in Section 6.1 of {{I-D.reddy-uta-pqc-app}} to reduce transmission overhead and improve handshake reliability.
+To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate chain optimization techniques outlined in Section 6.1 of {{I-D.ietf-uta-pqc-app}} to reduce transmission overhead and improve handshake reliability.
 
 # EST Integration {#ext-extn}
 
@@ -142,7 +144,11 @@ After retrieving intermediate certificates via EST, a EAP client that believes i
 
 # Security Considerations
 
-The security considerations outlined in {{I-D.reddy-uta-pqc-app}} and {{?I-D.ietf-pquip-pqc-engineers}} must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.
+The security considerations outlined in {{I-D.ietf-uta-pqc-app}} and {{?I-D.ietf-pquip-pqc-engineers}} must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.
+
+# IANA Considerations
+
+This document does not request the creation of a new IANA registry nor the registration of the two URI path components defined in {{ext-extn}}.
 
 # Acknowledgements
 {:numbered="false"}
