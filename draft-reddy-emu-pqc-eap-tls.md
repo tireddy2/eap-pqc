@@ -171,6 +171,9 @@ including:
    * Client credentials used in certificate-based authentication (e.g., usernames,
      device or organization identifiers).
 
+   * In the case of EAP-TTLS and TEAP, HNDL attacks present an additional threat. These 
+     methods typically carry legacy inner authentication protocols within the outer TLS tunnel, such as MS-CHAPv2. If a CRQC is used to break the outer TLS tunnel, the exposed inner authentication exchange could enable offline password attacks, potentially allowing an adversary to recover user credentials.
+
 To preserve the intended privacy guarantees of TLS 1.3 and to protect against HNDL
 attacks, TLS-based EAP deployments that require long-term confidentiality will need to
 adopt post-quantum key exchange mechanisms, as outlined in Section 4 of
@@ -280,7 +283,7 @@ be the same certificate chain EAP clients use in the TLS-based EAP session.
 EAP clients and servers MUST authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
 via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
-ANIMA/BRSKI {{RFC8995}}, EST {{RFC7030}}, or out-of-band provisioning. The choice of
+BRSKI {{RFC8995}}, EST {{RFC7030}}, or out-of-band provisioning. The choice of
 bootstrapping mechanism is a deployment decision and is out of scope for this document.
 Certificate chains retrieved from an unauthenticated or untrusted EST server MUST NOT be
 used for TLS chain validation.
@@ -292,9 +295,7 @@ or expiration. These include periodic re-fetching, honoring HTTP cache control h
 certificates.
 
 EAP clients MAY omit intermediate certificates from the TLS handshake only if they have
-been explicitly configured by the administrator to do so. Such configuration SHOULD only
-be applied in deployments where both the EAP client and EAP server support this
-specification and have completed EST pre-fetching as part of provisioning. If no such
+been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
 configuration is present, the EAP client MUST include the full certificate chain in the
 TLS handshake. Similarly, an EAP server MAY omit intermediate certificates from the TLS
 handshake only if it has been explicitly configured by the administrator to do so.
