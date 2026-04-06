@@ -4,30 +4,35 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>Post-Quantum Enhancements to EAP-TLS and EAP-TTLS</title>
+<title>Post-Quantum Enhancements to TLS-Based EAP Methods</title>
 <meta content="Tirumaleswar Reddy" name="author">
 <meta content="
-       This document proposes enhancements to the Extensible Authentication Protocol with Transport Layer Security (EAP-TLS) and EAP Tunneled TLS (EAP-TTLS) to incorporate post-quantum cryptographic mechanisms. It also addresses challenges related to large certificate sizes and long certificate chains, as identified in  , and provides recommendations for integrating PQC algorithms into EAP-TLS and EAP-TTLS deployments. 
+       This document proposes enhancements to TLS-based EAP methods, including the Extensible
+Authentication Protocol with Transport Layer Security (EAP-TLS), EAP Tunneled TLS
+(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP), to incorporate
+post-quantum cryptographic mechanisms. It also addresses challenges related to large
+certificate sizes and long certificate chains, as identified in  , and
+provides recommendations for integrating PQC algorithms into TLS-based EAP deployments. 
     " name="description">
-<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="xml2rfc 3.32.0" name="generator">
 <meta content="PQC" name="keyword">
 <meta content="PQ/T Hybrid" name="keyword">
 <meta content="TLS" name="keyword">
 <meta content="EAP" name="keyword">
 <meta content="draft-reddy-emu-pqc-eap-tls-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.31.0
+  xml2rfc 3.32.0
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.0.2
-    platformdirs 4.5.1
+    platformdirs 4.9.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
-    wcwidth 0.3.0
+    wcwidth 0.6.0
 -->
 <link href="draft-reddy-emu-pqc-eap-tls.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -168,7 +173,7 @@
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -176,7 +181,8 @@
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -1046,12 +1052,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <table class="ears">
 <thead><tr>
 <td class="left">Internet-Draft</td>
-<td class="center">PQC Enhancements to EAP-TLS/TTLS</td>
-<td class="right">January 2026</td>
+<td class="center">PQC Enhancements to TLS-Based EAP Method</td>
+<td class="right">April 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Reddy</td>
-<td class="center">Expires 28 July 2026</td>
+<td class="center">Expires 8 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-reddy-emu-pqc-eap-tls-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-24" class="published">24 January 2026</time>
+<time datetime="2026-04-06" class="published">6 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-07-28">28 July 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-08">8 October 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1079,10 +1085,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </dd>
 </dl>
 </div>
-<h1 id="title">Post-Quantum Enhancements to EAP-TLS and EAP-TTLS</h1>
+<h1 id="title">Post-Quantum Enhancements to TLS-Based EAP Methods</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document proposes enhancements to the Extensible Authentication Protocol with Transport Layer Security (EAP-TLS) and EAP Tunneled TLS (EAP-TTLS) to incorporate post-quantum cryptographic mechanisms. It also addresses challenges related to large certificate sizes and long certificate chains, as identified in <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span>, and provides recommendations for integrating PQC algorithms into EAP-TLS and EAP-TTLS deployments.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document proposes enhancements to TLS-based EAP methods, including the Extensible
+Authentication Protocol with Transport Layer Security (EAP-TLS), EAP Tunneled TLS
+(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP), to incorporate
+post-quantum cryptographic mechanisms. It also addresses challenges related to large
+certificate sizes and long certificate chains, as identified in <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span>, and
+provides recommendations for integrating PQC algorithms into TLS-based EAP deployments.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1116,7 +1127,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 28 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1152,10 +1163,10 @@ svg :is([fill="white"], [fill^="#fff"]) {
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-data-confidentiality-in-eap" class="internal xref">Data Confidentiality in EAP-TLS</a></p>
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-data-confidentiality-in-tls" class="internal xref">Data Confidentiality in TLS-Based EAP Methods</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
-            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-post-quantum-authentication" class="internal xref">Post-Quantum Authentication in EAP-TLS</a></p>
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-post-quantum-authentication" class="internal xref">Post-Quantum Authentication in TLS-Based EAP Methods</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-est-integration" class="internal xref">EST Integration</a></p>
@@ -1192,9 +1203,33 @@ svg :is([fill="white"], [fill^="#fff"]) {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">The emergence of a Cryptographically Relevant Quantum Computer (CRQC) would break the mathematical assumptions that underpins widely deployed public-key algorithms, rendering them insecure and obsolete. As a result, there is an urgent need to update protocols and infrastructure with post-quantum cryptographic (PQC) algorithms designed to resist attacks from both quantum and classical adversaries. The cryptographic primitives requiring replacement are discussed in <span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span>, and the NIST PQC Standardization process has initially selected algorithms such as ML-KEM, SLH-DSA, and ML-DSA for usage in security protocols.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">To mitigate the risks posed by a CRQC, such as the potential compromise of encrypted data and the forging of digital signatures, existing security protocols must be upgraded to support PQC. These risks include "Harvest Now, Decrypt Later" (HNDL) attack, where adversaries capture encrypted traffic today with the intent to decrypt it once CRQCs become available. Protocols such as EAP-TLS and EAP-TTLS are widely used for network access authentication in Enterprise and Wireless environments. To continue providing long-term confidentiality and authentication guarantees, EAP-TLS and EAP-TTLS must evolve to incorporate post-quantum algorithms.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">However, transitioning these protocols to support PQC introduces practical challenges. <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span> highlights issues related to large certificates and certificate chains in EAP-TLS, which can lead to session failures due to round-trip limitations. PQC certificates and certificate chains tend to be significantly larger than their traditional counterparts, further exacerbating these issues by increasing TLS handshake sizes and the likelihood of session failures. To address these challenges, this draft proposes mitigation strategies that enable the  use of PQC within EAP-TLS and EAP-TTLS, ensuring secure and efficient authentication even in constrained network environments.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-1">The emergence of a Cryptographically Relevant Quantum Computer (CRQC) would break the
+mathematical assumptions that underpin widely deployed public-key algorithms, rendering
+them insecure and obsolete. As a result, there is an urgent need to update protocols and
+infrastructure with post-quantum cryptographic (PQC) algorithms designed to resist
+attacks from both quantum and classical adversaries. The cryptographic primitives
+requiring replacement are discussed in <span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span>, and the NIST
+PQC Standardization process has initially selected algorithms such as ML-KEM
+<span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>, ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, and SLH-DSA <span>[<a href="#FIPS205" class="cite xref">FIPS205</a>]</span> for usage in security
+protocols.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">To mitigate the risks posed by a CRQC, such as the potential compromise of encrypted
+data and the forging of digital signatures, existing security protocols must be upgraded
+to support PQC. These risks include "Harvest Now, Decrypt Later" (HNDL) attacks, where
+adversaries capture encrypted traffic today with the intent to decrypt it once CRQCs
+become available. TLS-based EAP methods are widely used for network access
+authentication in enterprise and wireless environments. This document applies to all EAP
+methods that use TLS as their underlying transport, including EAP-TLS <span>[<a href="#RFC9190" class="cite xref">RFC9190</a>]</span>,
+EAP-TTLS <span>[<a href="#RFC5281" class="cite xref">RFC5281</a>]</span>, PEAP, and TEAP <span>[<a href="#RFC7170" class="cite xref">RFC7170</a>]</span>. To continue providing long-term
+confidentiality and authentication guarantees, these methods must evolve to incorporate
+post-quantum algorithms.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">However, transitioning these protocols to support PQC introduces practical challenges.
+<span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span> highlights issues related to large certificates and certificate chains in
+EAP-TLS, which can lead to session failures due to round-trip limitations. PQC
+certificates and certificate chains tend to be significantly larger than their
+traditional counterparts, further exacerbating these issues by increasing TLS handshake
+sizes and the likelihood of session failures. To address these challenges, this draft
+proposes mitigation strategies that enable the use of PQC within TLS-based EAP methods,
+ensuring secure and efficient authentication even in constrained network environments.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1206,60 +1241,123 @@ svg :is([fill="white"], [fill^="#fff"]) {
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">This document adopts terminology defined in <span>[<a href="#I-D.ietf-pquip-pqt-hybrid-terminology" class="cite xref">I-D.ietf-pquip-pqt-hybrid-terminology</a>]</span>. For the purposes of this document, it is useful to categorize cryptographic algorithms into three distinct classes:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-2">This document adopts terminology defined in <span>[<a href="#I-D.ietf-pquip-pqt-hybrid-terminology" class="cite xref">I-D.ietf-pquip-pqt-hybrid-terminology</a>]</span>.
+For the purposes of this document, it is useful to categorize cryptographic algorithms
+into three distinct classes:<a href="#section-2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-3.1">
-          <p id="section-2-3.1.1">Traditional Algorithm: An asymmetric cryptographic algorithm based on integer factorization, finite field discrete logarithms, or elliptic curve discrete logarithms. In the context of TLS, an example of a traditional key exchange algorithm is Elliptic Curve Diffie-Hellman (ECDH), which is almost exclusively used in its ephemeral mode, referred to as Elliptic Curve Diffie-Hellman Ephemeral (ECDHE).<a href="#section-2-3.1.1" class="pilcrow">¶</a></p>
+          <p id="section-2-3.1.1">Traditional Algorithm: An asymmetric cryptographic algorithm based on integer
+factorization, finite field discrete logarithms, or elliptic curve discrete
+logarithms. In the context of TLS, an example of a traditional key exchange algorithm
+is Elliptic Curve Diffie-Hellman (ECDH), which is almost exclusively used in its
+ephemeral mode, referred to as Elliptic Curve Diffie-Hellman Ephemeral (ECDHE).<a href="#section-2-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-3.2">
-          <p id="section-2-3.2.1">Post-Quantum Algorithm: An asymmetric cryptographic algorithm designed to be secure against attacks from both quantum and classical computers. An example of a post-quantum key exchange algorithm is the Module-Lattice Key Encapsulation Mechanism (ML-KEM).<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+          <p id="section-2-3.2.1">Post-Quantum Algorithm: An asymmetric cryptographic algorithm designed to be secure
+against attacks from both quantum and classical computers. An example of a
+post-quantum key exchange algorithm is the Module-Lattice Key Encapsulation Mechanism
+(ML-KEM).<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-3.3">
           <p id="section-2-3.3.1">Hybrid Algorithm: We distinguish between key exchanges and signature algorithms:<a href="#section-2-3.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-3.3.2.1">
-              <p id="section-2-3.3.2.1.1">Hybrid Key Exchange: A key exchange mechanism that combines two component algorithms - one traditional algorithm and one post-quantum algorithm. The resulting shared secret remains secure as long as at least one of the component key exchange algorithms remains unbroken.<a href="#section-2-3.3.2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-2-3.3.2.1.1">Hybrid Key Exchange: A key exchange mechanism that combines two component algorithms<a href="#section-2-3.3.2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-3.3.2.1.2.1">
+                  <p id="section-2-3.3.2.1.2.1.1">one traditional algorithm and one post-quantum algorithm. The resulting shared
+secret remains secure as long as at least one of the component key exchange
+algorithms remains unbroken.<a href="#section-2-3.3.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
 </li>
             <li class="normal" id="section-2-3.3.2.2">
-              <p id="section-2-3.3.2.2.1">PQ/T Hybrid Digital Signature: A multi-algorithm digital signature scheme composed of two or more component signature algorithms, where at least one is a post-quantum algorithm and at least one is a traditional algorithm.<a href="#section-2-3.3.2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-2-3.3.2.2.1">PQ/T Hybrid Digital Signature: A multi-algorithm digital signature scheme composed
+of two or more component signature algorithms, where at least one is a post-quantum
+algorithm and at least one is a traditional algorithm.<a href="#section-2-3.3.2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </li>
       </ul>
-<p id="section-2-4">Digital signature algorithms play a critical role in X.509 certificates, Certificate Transparency Signed Certificate Timestamps, Online Certificate Status Protocol (OCSP) statements, and any other mechanism that contributes signatures during a TLS handshake or in context of a secure communication establishment.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-4">Digital signature algorithms play a critical role in X.509 certificates, Certificate
+Transparency Signed Certificate Timestamps, Online Certificate Status Protocol (OCSP)
+statements, and any other mechanism that contributes signatures during a TLS handshake
+or in the context of a secure communication establishment.<a href="#section-2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="confident">
 <section id="section-3">
-      <h2 id="name-data-confidentiality-in-eap">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-data-confidentiality-in-eap" class="section-name selfRef">Data Confidentiality in EAP-TLS</a>
+      <h2 id="name-data-confidentiality-in-tls">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-data-confidentiality-in-tls" class="section-name selfRef">Data Confidentiality in TLS-Based EAP Methods</a>
       </h2>
-<p id="section-3-1">One of the primary threats to EAP-TLS and EAP-TTLS is the HNDL attack. In this scenario, adversaries can passively capture EAP-TLS handshakes such as those transmitted over the air in Wi-Fi networks and store them for future decryption once CRQCs become available.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">While EAP-TLS 1.3 <span>[<a href="#RFC9190" class="cite xref">RFC9190</a>]</span> provides forward secrecy through ephemeral key exchange and improves privacy by encrypting client identity and reducing exposure of session metadata, these protections rely on the security of the underlying key exchange algorithm. In the presence of a CRQC, traditional key exchange mechanisms (e.g., ECDHE) would no longer provide long-term confidentiality. In such cases, an adversary could mount a HDNL attack by passively recording EAP-TLS handshakes and decrypting the captured traffic once quantum-capable cryptanalysis becomes feasible. This could retroactively expose information that TLS 1.3 is otherwise designed to protect, including:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-1">One of the primary threats to TLS-based EAP methods is the HNDL attack. In this
+scenario, adversaries can passively capture EAP-TLS handshakes such as those transmitted
+over the air in Wi-Fi networks and store them for future decryption once CRQCs become
+available.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">While EAP-TLS 1.3 <span>[<a href="#RFC9190" class="cite xref">RFC9190</a>]</span> provides forward secrecy through ephemeral key exchange
+and improves privacy by encrypting client identity and reducing exposure of session
+metadata, these protections rely on the security of the underlying key exchange
+algorithm. In the presence of a CRQC, traditional key exchange mechanisms (e.g., ECDHE)
+would no longer provide long-term confidentiality. In such cases, an adversary could
+mount an HNDL attack by passively recording EAP-TLS handshakes and decrypting the
+captured traffic once quantum-capable cryptanalysis becomes feasible. This could
+retroactively expose information that TLS 1.3 is otherwise designed to protect,
+including:<a href="#section-3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-3.1">
           <p id="section-3-3.1.1">The identity of the authenticated client.<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-3-3.2">
-          <p id="section-3-3.2.1">Client credentials used in certificate-based authentication (e.g., usernames, device or organization identifiers).<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
+          <p id="section-3-3.2.1">Client credentials used in certificate-based authentication (e.g., usernames,
+device or organization identifiers).<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-3-4">To preserve the intended privacy guarantees of TLS 1.3 and to protect against HDNL attacks, EAP-TLS and EAP-TTLS deployments that require long-term confidentiality will need to adopt post-quantum key exchange mechanisms, as outlined in Section 4 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<p id="section-3-5">These mechanisms ensure that even if handshake data is recorded today, it cannot be decrypted in the future, maintaining the confidentiality and privacy of the TLS session.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">Furthermore, to support hybrid or PQC-only key exchange in bandwidth or latency-constrained EAP deployments, EAP clients and servers should apply the optimizations described in Section 4.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to minimize performance overhead.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-4">To preserve the intended privacy guarantees of TLS 1.3 and to protect against HNDL
+attacks, TLS-based EAP deployments that require long-term confidentiality will need to
+adopt post-quantum key exchange mechanisms, as outlined in Section 4 of
+<span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">These mechanisms ensure that even if handshake data is recorded today, it cannot be
+decrypted in the future, maintaining the confidentiality and privacy of the TLS session.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">Furthermore, to support hybrid or PQC-only key exchange in bandwidth or
+latency-constrained EAP deployments, EAP clients and servers should apply the
+optimizations described in Section 4.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to minimize
+performance overhead.<a href="#section-3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="eaptls-authentication">
 <section id="section-4">
       <h2 id="name-post-quantum-authentication">
-<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-post-quantum-authentication" class="section-name selfRef">Post-Quantum Authentication in EAP-TLS</a>
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-post-quantum-authentication" class="section-name selfRef">Post-Quantum Authentication in TLS-Based EAP Methods</a>
       </h2>
-<p id="section-4-1">Although a CRQC would primarily impact the confidentiality of recorded TLS sessions, it could also pose risks to authentication mechanisms that rely on traditional public-key algorithms with long-lived credentials. In particular, if quantum-capable cryptanalysis were to become practical within the validity period of a certificate, an adversary could recover the private key corresponding to a traditionally signed certificate and subsequently impersonate the certificate holder in real time. The feasibility and impact of such attacks depend on several factors, including certificate lifetimes and key management practices.<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2">EAP-TLS and EAP-TTLS deployments rely on X.509 certificates issued by CAs, and the transition to PQ certificate authentication is constrained by the long lifecycle associated with distributing, deploying, and validating new trust anchors. If CRQCs arrive sooner than anticipated, deployed authentication systems may lack the agility to transition credentials and trust anchors in a timely manner.<a href="#section-4-2" class="pilcrow">¶</a></p>
-<p id="section-4-3">As a result, deployments that rely on long-lived certificates or that require resistance to future quantum-capable adversaries face an increased risk of authentication compromise. In such scenarios, an on-path attacker that is able to recover a server’s private key within the certificate validity period could impersonate access points (APs) in real time, potentially deceiving users into revealing credentials or connecting to rogue networks.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">To mitigate these risks, EAP-TLS and EAP-TTLS deployments will need to adopt, over time, either PQ or PQ/T hybrid certificate-based authentication, as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-00#section-5" class="relref">Section 5</a> of [<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">The use of PQ or PQ/T hybrid certificates increases the size of individual certificates, certificate chains, and signatures, resulting in significantly larger handshake messages. These larger payloads can lead to packet fragmentation, retransmissions, and handshake delays, issues that are particularly disruptive in constrained or lossy network environments.<a href="#section-4-5" class="pilcrow">¶</a></p>
-<p id="section-4-6">To address these impacts, EAP-TLS and EAP-TTLS deployments can apply certificate chain optimization techniques outlined in Section 6.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to reduce transmission overhead and improve handshake reliability.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-1">Although a CRQC would primarily impact the confidentiality of recorded TLS sessions, it
+could also pose risks to authentication mechanisms that rely on traditional public-key
+algorithms with long-lived credentials. In particular, if quantum-capable cryptanalysis
+were to become practical within the validity period of a certificate, an adversary could
+recover the private key corresponding to a traditionally signed certificate and
+subsequently impersonate the certificate holder in real time. The feasibility and impact
+of such attacks depend on several factors, including certificate lifetimes and key
+management practices.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">TLS-based EAP deployments rely on X.509 certificates issued by CAs, and the transition
+to PQ certificate authentication is constrained by the long lifecycle associated with
+distributing, deploying, and validating new trust anchors. If CRQCs arrive sooner than
+anticipated, deployed authentication systems may lack the agility to transition
+credentials and trust anchors in a timely manner.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">As a result, deployments that rely on long-lived certificates or that require resistance
+to future quantum-capable adversaries face an increased risk of authentication
+compromise. In such scenarios, an on-path attacker that is able to recover a server's
+private key within the certificate validity period could impersonate access points (APs)
+in real time, potentially deceiving users into revealing credentials or connecting to
+rogue networks.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">To mitigate these risks, TLS-based EAP deployments will need to adopt, over time, either
+PQ or PQ/T hybrid certificate-based authentication, as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01#section-5" class="relref">Section 5</a> of [<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">The use of PQ or PQ/T hybrid certificates increases the size of individual certificates,
+certificate chains, and signatures, resulting in significantly larger handshake messages.
+These larger payloads can lead to packet fragmentation, retransmissions, and handshake
+delays, issues that are particularly disruptive in constrained or lossy network
+environments.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">To address these impacts, TLS-based EAP deployments can apply certificate chain
+optimization techniques outlined in Section 6.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to reduce
+transmission overhead and improve handshake reliability.<a href="#section-4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ext-extn">
@@ -1267,27 +1365,78 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-est-integration">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-est-integration" class="section-name selfRef">EST Integration</a>
       </h2>
-<p id="section-5-1">The EAP-client is expected to validate the certificate presented by the EAP-server using a trust anchor that is provisioned out-of-band prior to authentication (e.g., using EST). The Intermediate certificates are provided by the EAP server during the EAP-TLS handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and validate the certificate chain. This model assumes a managed deployment environment with explicitly configured trust relationships between the EAP-client and EAP-server.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">To further reduce handshake overhead, particularly in deployments using large certificate chains due to post-quantum (PQ) or composite certificates, this draft proposes an optimization that leverages the Enrollment over Secure Transport (EST) protocol <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, extended by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>. Specifically, it allows intermediate certificates to be retrieved in advance by using EST, thereby avoiding the need to transmit them during each EAP-TLS exchange.<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">This section defines extensions to EST to support retrieval of the certificate chain used by a EAP server and EAP clients. The first extension enables clients to obtain access to the complete set of published intermediate certificates of the EAP server.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4">A new path component is defined under the EST well-known URI:<a href="#section-5-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5-5">
+<p id="section-5-1">The EAP client is expected to validate the certificate presented by the EAP server using
+a trust anchor that is provisioned out-of-band prior to authentication (e.g., using
+EST). The intermediate certificates are provided by the EAP server during the TLS
+handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
+validate the certificate chain. This model assumes a managed deployment environment with
+explicitly configured trust relationships between the EAP client and EAP server.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">To further reduce handshake overhead, particularly in deployments using large certificate
+chains due to post-quantum (PQ) or composite certificates, this draft proposes an
+optimization that leverages the Enrollment over Secure Transport (EST) protocol
+<span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, extended by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>. Specifically, it allows intermediate certificates
+to be retrieved in advance by using EST, thereby avoiding the need to transmit them
+during each TLS handshake.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
+optimization described in this section applies to the certificates used in the outer TLS
+tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">This section defines extensions to EST to support retrieval of the certificate chain used
+by an EAP server and EAP clients. The first extension enables clients to obtain access to
+the complete set of published intermediate certificates of the EAP server.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">A new path component is defined under the EST well-known URI:<a href="#section-5-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5-6">
 <pre>
 GET /.well-known/est/eapservercertchain
-</pre><a href="#section-5-5" class="pilcrow">¶</a>
+</pre><a href="#section-5-6" class="pilcrow">¶</a>
 </div>
-<p id="section-5-6">The '/eapservercertchain' is intended for informational retrieval only and does not require client authentication. It allows clients to retrieve the intermediate certificate chain that the EAP server presents during TLS handshakes. This request is performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span> be the same certificate chain EAP server uses in a EAP-TLS or EAP-TTLS session.<a href="#section-5-6" class="pilcrow">¶</a></p>
-<p id="section-5-7">The second extension enables EAP servers to obtain access to the complete set of published intermediate certificates of the EAP clients. Rather than relying on static configuration, the EAP server can dynamically fetch the client's intermediate certificate chain from a trusted EST server within the same administrative domain.<a href="#section-5-7" class="pilcrow">¶</a></p>
-<p id="section-5-8">A new path component is defined under the EST well-known URI:<a href="#section-5-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5-9">
+<p id="section-5-7">The '/eapservercertchain' is intended for informational retrieval only and does not
+require client authentication. It allows clients to retrieve the intermediate certificate
+chain that the EAP server presents during TLS handshakes. This request is performed
+using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client
+authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span> be the same
+certificate chain the EAP server uses in a TLS-based EAP session.<a href="#section-5-7" class="pilcrow">¶</a></p>
+<p id="section-5-8">The second extension enables EAP servers to obtain access to the complete set of
+published intermediate certificates of the EAP clients. Rather than relying on static
+configuration, the EAP server can dynamically fetch the client's intermediate certificate
+chain from a trusted EST server within the same administrative domain.<a href="#section-5-8" class="pilcrow">¶</a></p>
+<p id="section-5-9">A new path component is defined under the EST well-known URI:<a href="#section-5-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5-10">
 <pre>
 GET /.well-known/est/eapclientcertchain
-</pre><a href="#section-5-9" class="pilcrow">¶</a>
+</pre><a href="#section-5-10" class="pilcrow">¶</a>
 </div>
-<p id="section-5-10">The '/eapclientcertchain' is intended for informational retrieval only and does not require client authentication. It allows EAP server to retrieve the intermediate certificate chain that the EAP clients present during TLS handshakes. This request is performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span> be the same certificate chain EAP clients use in the EAP-TLS or EAP-TTLS session.<a href="#section-5-10" class="pilcrow">¶</a></p>
-<p id="section-5-11">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce latency and network overhead. However, they <span class="bcp14">SHOULD</span> implement mechanisms to detect changes or expiration. These include periodic re-fetching, honoring HTTP cache control headers (e.g., Cache-Control, ETag), and verifying the validity period of intermediate certificates.<a href="#section-5-11" class="pilcrow">¶</a></p>
-<p id="section-5-12">As an alternative, a device <span class="bcp14">MAY</span> attempt to retrieve the certificate chain from the EST server (e.g., /eapservercertchain or /eapclientcertchain) only when certificate validation fails during an EAP-TLS or EAP-TTLS handshake. While this on-demand retrieval can serve as a fallback to recover from outdated intermediate certificate, it has the drawback of delaying authentication.<a href="#section-5-12" class="pilcrow">¶</a></p>
-<p id="section-5-13">After retrieving intermediate certificates via EST, a EAP client that believes it has a complete set of intermediate certificates to authenticate the EAP server sends the tls_flags extension as defined in <span>[<a href="#I-D.kampanakis-tls-scas-latest" class="cite xref">I-D.kampanakis-tls-scas-latest</a>]</span> with the 0xTBD1 flag set to 1 in its ClientHello message. Similarly, a EAP server that believes it has a complete set of intermediate certificates to authenticate the EAP client sends the same tls_flags extension with 0xTBD1 set to 1 in its CertificateRequest message. In both cases, only the end-entity certificates will be provided by the EAP client and server during the TLS handshake, relying on the recipient to possess or retrieve the necessary intermediate certificates for certificate chain validation.<a href="#section-5-13" class="pilcrow">¶</a></p>
+<p id="section-5-11">The '/eapclientcertchain' is intended for informational retrieval only and does not
+require client authentication. It allows the EAP server to retrieve the intermediate
+certificate chain that the EAP clients present during TLS handshakes. This request is
+performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without
+requiring client authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span>
+be the same certificate chain EAP clients use in the TLS-based EAP session.<a href="#section-5-11" class="pilcrow">¶</a></p>
+<p id="section-5-12">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
+via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
+via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
+ANIMA/BRSKI <span>[<a href="#RFC8995" class="cite xref">RFC8995</a>]</span>, EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, or out-of-band provisioning. The choice of
+bootstrapping mechanism is a deployment decision and is out of scope for this document.
+Certificate chains retrieved from an unauthenticated or untrusted EST server <span class="bcp14">MUST NOT</span> be
+used for TLS chain validation.<a href="#section-5-12" class="pilcrow">¶</a></p>
+<p id="section-5-13">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce
+latency and network overhead. However, they <span class="bcp14">SHOULD</span> implement mechanisms to detect changes
+or expiration. These include periodic re-fetching, honoring HTTP cache control headers
+(e.g., Cache-Control, ETag), and verifying the validity period of intermediate
+certificates.<a href="#section-5-13" class="pilcrow">¶</a></p>
+<p id="section-5-14">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
+been explicitly configured by the administrator to do so. Such configuration <span class="bcp14">SHOULD</span> only
+be applied in deployments where both the EAP client and EAP server support this
+specification and have completed EST pre-fetching as part of provisioning. If no such
+configuration is present, the EAP client <span class="bcp14">MUST</span> include the full certificate chain in the
+TLS handshake. Similarly, an EAP server <span class="bcp14">MAY</span> omit intermediate certificates from the TLS
+handshake only if it has been explicitly configured by the administrator to do so.
+Administrators are advised to ensure that clients in the deployment have retrieved the
+server's intermediate certificates via EST as part of their provisioning process before
+enabling this configuration.<a href="#section-5-14" class="pilcrow">¶</a></p>
+<p id="section-5-15">Note: A TLS extension could be used to explicitly signal support for intermediate
+certificate omission between peers, avoiding the need for administrator configuration.
+Such a mechanism is considered a possible future solution but is out of scope for this
+document.<a href="#section-5-15" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
@@ -1295,7 +1444,9 @@ GET /.well-known/est/eapclientcertchain
       <h2 id="name-security-considerations">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-6-1">The security considerations outlined in <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> and <span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span> must be carefully evaluated and taken into account for both EAP-TLS and EAP-TTLS deployments.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-1">The security considerations outlined in <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> and
+<span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span> must be carefully evaluated and taken into account for
+all TLS-based EAP deployments.<a href="#section-6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1303,7 +1454,11 @@ GET /.well-known/est/eapclientcertchain
       <h2 id="name-iana-considerations">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-7-1">This document does not request the creation of a new IANA registry nor the registration of the two URI path components defined in <a href="#ext-extn" class="auto internal xref">Section 5</a>.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-1">This document defines two new path components under the EST well-known URI
+'/.well-known/est/', following the extension mechanism established by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>:
+'/eapservercertchain' and '/eapclientcertchain'. As these are sub-paths under the
+already-registered '/.well-known/est/' prefix defined in <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, no new IANA
+registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="acknowledgements">
@@ -1311,7 +1466,7 @@ GET /.well-known/est/eapclientcertchain
       <h2 id="name-acknowledgements">
 <a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
       </h2>
-<p id="section-8-1">TBA.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-1">Thanks to John Mattsson, Hannes Tschofenig, Alan Dekok and Michael Richardson for the discussion and comments.<a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1327,7 +1482,7 @@ GET /.well-known/est/eapclientcertchain
 <dl class="references">
 <dt id="I-D.ietf-uta-pqc-app">[I-D.ietf-uta-pqc-app]</dt>
         <dd>
-<span class="refAuthor">Reddy.K, T.</span> and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Post-Quantum Cryptography Recommendations for TLS-based Applications"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-uta-pqc-app-00</span>, <time datetime="2025-09-18" class="refDate">18 September 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-00">https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-00</a>&gt;</span>. </dd>
+<span class="refAuthor">Reddy.K, T.</span> and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Post-Quantum Cryptography Recommendations for TLS-based Applications"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-uta-pqc-app-01</span>, <time datetime="2026-02-24" class="refDate">24 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01">https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -1358,6 +1513,18 @@ GET /.well-known/est/eapclientcertchain
 <a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="FIPS203">[FIPS203]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Module-Lattice-Based Key-Encapsulation Mechanism Standard"</span>, <span class="seriesInfo">FIPS 203</span>, <time datetime="2024" class="refDate">2024</time>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS204">[FIPS204]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Module-Lattice-Based Digital Signature Standard"</span>, <span class="seriesInfo">FIPS 204</span>, <time datetime="2024" class="refDate">2024</time>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS205">[FIPS205]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Stateless Hash-Based Digital Signature Standard"</span>, <span class="seriesInfo">FIPS 205</span>, <time datetime="2024" class="refDate">2024</time>. </dd>
+<dd class="break"></dd>
 <dt id="I-D.ietf-pquip-pqc-engineers">[I-D.ietf-pquip-pqc-engineers]</dt>
         <dd>
 <span class="refAuthor">Banerjee, A.</span>, <span class="refAuthor">Reddy.K, T.</span>, <span class="refAuthor">Schoinianakis, D.</span>, <span class="refAuthor">Hollebeek, T.</span>, and <span class="refAuthor">M. Ounsworth</span>, <span class="refTitle">"Post-Quantum Cryptography for Engineers"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-pquip-pqc-engineers-14</span>, <time datetime="2025-08-25" class="refDate">25 August 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqc-engineers-14">https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqc-engineers-14</a>&gt;</span>. </dd>
@@ -1366,9 +1533,17 @@ GET /.well-known/est/eapclientcertchain
         <dd>
 <span class="refAuthor">D, F.</span>, <span class="refAuthor">P, M.</span>, and <span class="refAuthor">B. Hale</span>, <span class="refTitle">"Terminology for Post-Quantum Traditional Hybrid Schemes"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-pquip-pqt-hybrid-terminology-06</span>, <time datetime="2025-01-10" class="refDate">10 January 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqt-hybrid-terminology-06">https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqt-hybrid-terminology-06</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="I-D.kampanakis-tls-scas-latest">[I-D.kampanakis-tls-scas-latest]</dt>
+<dt id="RFC5281">[RFC5281]</dt>
         <dd>
-<span class="refAuthor">Kampanakis, P.</span>, <span class="refAuthor">Bytheway, C.</span>, <span class="refAuthor">Westerbaan, B.</span>, and <span class="refAuthor">M. Thomson</span>, <span class="refTitle">"Suppressing CA Certificates in TLS 1.3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-kampanakis-tls-scas-latest-03</span>, <time datetime="2023-01-05" class="refDate">5 January 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-kampanakis-tls-scas-latest-03">https://datatracker.ietf.org/doc/html/draft-kampanakis-tls-scas-latest-03</a>&gt;</span>. </dd>
+<span class="refAuthor">Funk, P.</span> and <span class="refAuthor">S. Blake-Wilson</span>, <span class="refTitle">"Extensible Authentication Protocol Tunneled Transport Layer Security Authenticated Protocol Version 0 (EAP-TTLSv0)"</span>, <span class="seriesInfo">RFC 5281</span>, <span class="seriesInfo">DOI 10.17487/RFC5281</span>, <time datetime="2008-08" class="refDate">August 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5281">https://www.rfc-editor.org/rfc/rfc5281</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7170">[RFC7170]</dt>
+        <dd>
+<span class="refAuthor">Zhou, H.</span>, <span class="refAuthor">Cam-Winget, N.</span>, <span class="refAuthor">Salowey, J.</span>, and <span class="refAuthor">S. Hanna</span>, <span class="refTitle">"Tunnel Extensible Authentication Protocol (TEAP) Version 1"</span>, <span class="seriesInfo">RFC 7170</span>, <span class="seriesInfo">DOI 10.17487/RFC7170</span>, <time datetime="2014-05" class="refDate">May 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7170">https://www.rfc-editor.org/rfc/rfc7170</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8995">[RFC8995]</dt>
+        <dd>
+<span class="refAuthor">Pritikin, M.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Eckert, T.</span>, <span class="refAuthor">Behringer, M.</span>, and <span class="refAuthor">K. Watsen</span>, <span class="refTitle">"Bootstrapping Remote Secure Key Infrastructure (BRSKI)"</span>, <span class="seriesInfo">RFC 8995</span>, <span class="seriesInfo">DOI 10.17487/RFC8995</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8995">https://www.rfc-editor.org/rfc/rfc8995</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9191">[RFC9191]</dt>
       <dd>
