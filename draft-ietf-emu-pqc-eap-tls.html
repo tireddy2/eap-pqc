@@ -7,34 +7,35 @@
 <title>Post-Quantum Enhancements to TLS-Based EAP Methods</title>
 <meta content="Tirumaleswar Reddy" name="author">
 <meta content="
-       This document proposes enhancements to TLS-based EAP methods, including the Extensible
+       This document specifies the use of post-quantum cryptography in TLS-based EAP methods,
+including the Extensible
 Authentication Protocol with Transport Layer Security (EAP-TLS), EAP Tunneled TLS
-(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP), to incorporate
-post-quantum cryptographic mechanisms. It also addresses challenges related to large
-certificate sizes and long certificate chains, as identified in  , and
-provides recommendations for integrating PQC algorithms into TLS-based EAP deployments. 
+(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP). It also addresses
+challenges related to large certificate sizes and long certificate chains, as identified
+in  , and specifies a mechanism to reduce TLS handshake size. 
     " name="description">
-<meta content="xml2rfc 3.32.0" name="generator">
+<meta content="xml2rfc 3.34.0" name="generator">
 <meta content="PQC" name="keyword">
 <meta content="PQ/T Hybrid" name="keyword">
 <meta content="TLS" name="keyword">
 <meta content="EAP" name="keyword">
-<meta content="draft-reddy-emu-pqc-eap-tls-latest" name="ietf.draft">
+<meta content="draft-ietf-emu-pqc-eap-tls-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.32.0
-    Python 3.12.12
-    ConfigArgParse 1.7
+  xml2rfc 3.34.0
+    Python 3.14.7
+    ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 6.0.2
-    platformdirs 4.9.4
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.11.7
     pycountry 24.6.1
     PyYAML 6.0.3
-    requests 2.32.5
-    wcwidth 0.6.0
+    requests 2.33.1
+    wcwidth 0.8.3
 -->
-<link href="draft-reddy-emu-pqc-eap-tls.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-ietf-emu-pqc-eap-tls.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@font-face {
   font-family: 'Lora';
@@ -68,7 +69,6 @@ provides recommendations for integrating PQC algorithms into TLS-based EAP deplo
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -117,7 +117,6 @@ provides recommendations for integrating PQC algorithms into TLS-based EAP deplo
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -182,7 +181,6 @@ provides recommendations for integrating PQC algorithms into TLS-based EAP deplo
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -299,16 +297,19 @@ h1, h2, h3, h4, h5, h6 {
   font-size-adjust: 0.5;
   color: var(--title-color);
 }
-h1#title {
-  font-size: 32px;
-  line-height: 40px;
-  clear: both;
-}
-h1#title, h1#rfcnum {
-  margin: 1.5em 0 0.2em;
-}
-h1#rfcnum + h1#title {
-  margin: 0.2em 0;
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
 }
 
 h1, h2, h3 {
@@ -328,10 +329,10 @@ h4, h5, h6 {
 #abstract+p {
   font-size: 18px;
   line-height: 24px;
-}
-#abstract+p code, #abstract+p samp, #abstract+p tt {
-  font-size: 16px;
-  line-height: 0;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
 }
 
 p {
@@ -342,59 +343,59 @@ p {
 div {
   margin: 0;
 }
-.alignRight.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignRight.art-text pre {
-  padding: 0;
-  width: auto;
-}
 .alignRight {
   margin: 1em 0;
-}
-.alignRight > *:first-child {
-  border: none;
-  margin: 0;
-  float: right;
-  clear: both;
-}
-.alignRight > *:nth-child(2) {
-  clear: both;
-  display: block;
-  border: none;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
 }
 svg {
   display: block;
-}
-/* font-family isn't space-separated, but =~ will have to do */
-svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
-  font-family: var(--font-mono);
-}
-.alignCenter.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignCenter.art-text pre {
-  padding: 0;
-  width: auto;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
 }
 .alignCenter {
   margin: 1em 0;
-}
-.alignCenter > *:first-child {
-  border: none;
-  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
-     support flexbox yet.
-  */
-  display: table;
-  margin: 0 auto;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
 }
 
 /* lists */
@@ -432,26 +433,25 @@ dl {
     --indent: 5ch;
     & > dt {
       min-width: calc(var(--indent) - 2ch);
+      float: none;
     }
-  }
-  &.olPercent > dt {
-    float: none;
   }
 
   dl > dd > & {
     margin-top: 0.5em;
     margin-bottom: 0;
   }
-}
-dl:not(.dlNewline) > dt {
-  float: left;
-  margin-right: 2ch;
-  min-width: 8ch;
-}
-dl > dd {
-  margin-bottom: .8em;
-  margin-left: var(--indent) !important; /* stupid element overrides */
-  min-height: 2ex;
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -467,20 +467,22 @@ dl > dd {
 }
 
 /* links */
-a, a[href].selfRef:hover {
+a {
   text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
 }
-a[href] {
-  color: var(--link-color);
-}
-a[href].selfRef, .iref + a[href].internal {
+.iref + a[href].internal {
   color: var(--text-color);
-}
-a[href]:hover {
-  text-decoration: underline;
-}
-a[href].selfRef:hover {
-  background-color: var(--highlight-color);
 }
 a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
   white-space: nowrap;
@@ -516,9 +518,9 @@ img {
 figure {
   margin: 0.5em 0;
   padding: 0;
-}
-figure blockquote {
-  margin: 0.8em 0.4em 0.4em;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
 }
 figcaption, caption {
   font-style: italic;
@@ -528,17 +530,19 @@ figcaption, caption {
 }
 @media screen {
   /* Auto-collapse boilerplate. */
-  :is(#status-of-memo, #copyright) p {
-    margin: -2px 0;
-    max-height: 0;
-    transition: max-height 2s ease, margin 0.5s ease 0.5s;
-    overflow: hidden;
-  }
-  :is(#status-of-memo, #copyright):hover p,
-  :is(#status-of-memo, #copyright) h2:target ~ p {
-    margin: 0.5em 0;
-    max-height: 500px;
-    overflow: auto;
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
   }
   pre, svg {
     display: inline-block;
@@ -588,25 +592,17 @@ table {
   max-width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
-}
-table.right {
-  margin-left: auto;
-}
-table.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-table.left {
-  margin-right: auto;
-}
-table .text-left {
-  text-align: left;
-}
-table .text-center {
-  text-align: center;
-}
-table .text-right {
-  text-align: right;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
 }
 
 thead, tbody {
@@ -626,13 +622,6 @@ th {
 :is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
   background-color: var(--highlight-color);
 }
-table caption {
-  margin: 0;
-  padding: 3px 0 3px 1em;
-}
-table p {
-  margin: 0;
-}
 
 /* pilcrow */
 a.pilcrow {
@@ -643,18 +632,16 @@ a.pilcrow {
     color: var(--pilcrow-weak);
     &:hover { text-decoration: none; }
   }
-}
-@media not print {
-  :hover > a.pilcrow, a.pilcrow:focus {
-    opacity: 1;
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
   }
-  a.pilcrow[href]:hover {
-    color: var(--pilcrow-strong);
-    background-color: transparent;
-  }
-}
-@media print {
-  a.pilcrow {
+  @media print {
     display: none;
   }
 }
@@ -713,9 +700,9 @@ sub, sup {
   font-size: 0.9em;
   font-style: italic;
   margin-top: 2em;
-}
-.docInfo .prepared {
-  float: right;
+  & .prepared {
+    float: right;
+  }
 }
 
 /* table of contents */
@@ -805,23 +792,27 @@ hr.addr {
   max-width: calc(100% - 16px);
 }
 @media (min-width: 500px) {
-  #authors-addresses > section {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  #authors-addresses > section > h2 {
-    column-span: all;
-  }
-  /* hack for break-inside: avoid-column */
-  #authors-addresses address {
-    display: inline-block;
-    break-inside: avoid-column;
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
   }
 }
 
 /* Comments */
-.rfcEditorRemove p:first-of-type {
-  font-style: italic;
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
 }
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
@@ -832,19 +823,21 @@ hr.addr {
 }
 
 @media screen {
-  #toc nav {
-    font-family: var(--font-title);
-    font-weight: 360;
-    & > ul { margin-bottom: 2em; }
-    & ul {
-      margin: 0 0 0 4px;
-      & :is(p, li) {
-        margin: 2px 0;
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
       }
     }
-  }
-  #toc a.toplink {
-    float: right;
+    & a.toplink {
+      float: right;
+    }
   }
 }
 @media not screen {
@@ -865,54 +858,54 @@ hr.addr {
     margin: 0;
     border-bottom: 1px solid #ccc;
     opacity: 0.6;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 2px 0 2px 6px;
-    padding-right: 1em;
-    font-size: 18px;
-    line-height: 24px;
-    min-width: 190px;
-    text-align: right;
-    background-color: #444;
-    color: white;
-    cursor: pointer;
-    &::before { /* css hamburger */
-      float: right;
-      position: relative;
-      width: 1em;
-      height: 1px;
-      left: -164px;
-      margin: 8px 0 0 0;
-      background: white none repeat scroll 0 0;
-      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
-      content: "";
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
     }
-  }
-  #toc nav {
-    display: none;
-    background-color: var(--background-color);
-    padding: 0.5em 1em 1em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    height: calc(100vh - 48px);
-    border-left: 1px solid #ddd;
-  }
-  #toc.active {
-    opacity: 1;
-    & nav { display: block; }
-  }
-  /* Make the collapsed ToC header render white on gray also when it's a link */
-  #toc h2 a,
-  #toc h2 a:is(:link, :focus, :hover),
-  #toc a.toplink,
-  #toc a.toplink:hover {
-    color: white;
-    background-color: #444;
-    text-decoration: none;
-  }
-  #toc a.toplink {
-    margin: 2px 0.5em 0;
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
   }
 }
 
@@ -931,26 +924,26 @@ hr.addr {
     margin: 0;
     padding: 0;
     z-index: 1;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 0.25em 1em 1em 0;
-  }
-  #toc nav {
-    display: block;
-    height: calc(90vh - 84px);
-    bottom: 0;
-    padding: 0.5em 0 2em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
   }
   img { /* future proofing */
     max-width: 100%;
     height: auto;
-  }
-  #toc a.toplink {
-    margin: 8px 0.5em 0;
   }
 }
 
@@ -966,12 +959,13 @@ hr.addr {
   #n-copyright-notice {
     border-bottom: none;
   }
-  #toc, #n-introduction {
-    page-break-before: always;
-  }
   #toc {
+    page-break-before: always;
     border-top: none;
     padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
   }
   figure, pre, .vcard {
     page-break-inside: avoid;
@@ -1033,17 +1027,19 @@ hr.addr {
 }
 
 /* SVG Trick: a prefix match works because only black and white are allowed */
-svg :is([stroke="black"], [stroke^="#000"]) {
-  stroke: var(--text-color);
-}
-svg :is([stroke="white"], [stroke^="#fff"]) {
-  stroke: var(--background-color);
-}
-svg :is([fill="black"], [fill^="#000"], :not([fill])) {
-  fill: var(--text-color);
-}
-svg :is([fill="white"], [fill^="#fff"]) {
-  fill: var(--background-color);
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
 }
 </style>
 
@@ -1053,11 +1049,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">PQC Enhancements to TLS-Based EAP Method</td>
-<td class="right">April 2026</td>
+<td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Reddy</td>
-<td class="center">Expires 8 October 2026</td>
+<td class="center">Expires 21 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,15 +1063,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">EAP Method Update</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-reddy-emu-pqc-eap-tls-latest</dd>
+<dd class="internet-draft">draft-ietf-emu-pqc-eap-tls-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-04-06" class="published">6 April 2026</time>
+<time datetime="2026-09-17" class="published">17 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-10-08">8 October 2026</time></dd>
+<dd class="expires"><time datetime="2027-03-21">21 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1088,12 +1084,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">Post-Quantum Enhancements to TLS-Based EAP Methods</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document proposes enhancements to TLS-based EAP methods, including the Extensible
+<p id="section-abstract-1">This document specifies the use of post-quantum cryptography in TLS-based EAP methods,
+including the Extensible
 Authentication Protocol with Transport Layer Security (EAP-TLS), EAP Tunneled TLS
-(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP), to incorporate
-post-quantum cryptographic mechanisms. It also addresses challenges related to large
-certificate sizes and long certificate chains, as identified in <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span>, and
-provides recommendations for integrating PQC algorithms into TLS-based EAP deployments.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+(EAP-TTLS), Protected EAP (PEAP), and EAP Tunnel Method (TEAP). It also addresses
+challenges related to large certificate sizes and long certificate chains, as identified
+in <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span>, and specifies a mechanism to reduce TLS handshake size.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1101,7 +1097,7 @@ provides recommendations for integrating PQC algorithms into TLS-based EAP deplo
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-reddy-emu-pqc-eap-tls/">https://datatracker.ietf.org/doc/draft-reddy-emu-pqc-eap-tls/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ietf-emu-pqc-eap-tls/">https://datatracker.ietf.org/doc/draft-ietf-emu-pqc-eap-tls/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
         EAP Method Update Working Group mailing list (<span><a href="mailto:emu@ietf.org">mailto:emu@ietf.org</a></span>),
@@ -1127,7 +1123,7 @@ provides recommendations for integrating PQC algorithms into TLS-based EAP deplo
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1208,7 +1204,7 @@ mathematical assumptions that underpin widely deployed public-key algorithms, re
 them insecure and obsolete. As a result, there is an urgent need to update protocols and
 infrastructure with post-quantum cryptographic (PQC) algorithms designed to resist
 attacks from both quantum and classical adversaries. The cryptographic primitives
-requiring replacement are discussed in <span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span>, and the NIST
+requiring replacement are discussed in <span>[<a href="#RFC9958" class="cite xref">RFC9958</a>]</span>, and the NIST
 PQC Standardization process has initially selected algorithms such as ML-KEM
 <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span>, ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, and SLH-DSA <span>[<a href="#FIPS205" class="cite xref">FIPS205</a>]</span> for usage in security
 protocols.<a href="#section-1-1" class="pilcrow">¶</a></p>
@@ -1227,9 +1223,10 @@ post-quantum algorithms.<a href="#section-1-2" class="pilcrow">¶</a></p>
 EAP-TLS, which can lead to session failures due to round-trip limitations. PQC
 certificates and certificate chains tend to be significantly larger than their
 traditional counterparts, further exacerbating these issues by increasing TLS handshake
-sizes and the likelihood of session failures. To address these challenges, this draft
-proposes mitigation strategies that enable the use of PQC within TLS-based EAP methods,
-ensuring secure and efficient authentication even in constrained network environments.<a href="#section-1-3" class="pilcrow">¶</a></p>
+sizes and the likelihood of session failures. To address these challenges, this document
+specifies post-quantum key agreement and authentication requirements for TLS-based EAP
+methods, together with a mechanism that reduces TLS handshake size for use in constrained
+network environments.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1241,7 +1238,7 @@ ensuring secure and efficient authentication even in constrained network environ
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">This document adopts terminology defined in <span>[<a href="#I-D.ietf-pquip-pqt-hybrid-terminology" class="cite xref">I-D.ietf-pquip-pqt-hybrid-terminology</a>]</span>.
+<p id="section-2-2">This document adopts terminology defined in <span>[<a href="#RFC9794" class="cite xref">RFC9794</a>]</span>.
 For the purposes of this document, it is useful to categorize cryptographic algorithms
 into three distinct classes:<a href="#section-2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -1312,16 +1309,28 @@ including:<a href="#section-3-2" class="pilcrow">¶</a></p>
 device or organization identifiers).<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-3-4">To preserve the intended privacy guarantees of TLS 1.3 and to protect against HNDL
-attacks, TLS-based EAP deployments that require long-term confidentiality will need to
-adopt post-quantum key exchange mechanisms, as outlined in Section 4 of
-<span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<p id="section-3-5">These mechanisms ensure that even if handshake data is recorded today, it cannot be
-decrypted in the future, maintaining the confidentiality and privacy of the TLS session.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">Furthermore, to support hybrid or PQC-only key exchange in bandwidth or
-latency-constrained EAP deployments, EAP clients and servers should apply the
-optimizations described in Section 4.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to minimize
-performance overhead.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-4">In the case of EAP-TTLS, PEAP, and TEAP, HNDL attacks present an additional threat.
+These methods typically carry legacy inner authentication protocols within the outer TLS
+tunnel, such as MS-CHAPv2. If a CRQC is used to break the outer TLS tunnel, the exposed
+inner authentication exchange could enable offline password attacks, potentially
+allowing an adversary to recover user credentials.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">To protect against HNDL attacks, TLS-based EAP deployments that require long-term
+confidentiality <span class="bcp14">MUST</span> use TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> and <span class="bcp14">MUST</span> negotiate a post-quantum or PQ/T
+hybrid key agreement group. Traditional key agreement groups alone do not provide
+long-term confidentiality against an adversary equipped with a CRQC.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">EAP peers and EAP servers <span class="bcp14">MUST</span> support at least one post-quantum or PQ/T hybrid key
+agreement group registered in the "TLS Supported Groups" registry. PQ/T hybrid groups
+combining ML-KEM with ECDHE are constructed as described in <span>[<a href="#RFC9954" class="cite xref">RFC9954</a>]</span> and registered
+in <span>[<a href="#RFC10024" class="cite xref">RFC10024</a>]</span>.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">This document does not mandate a specific group. The Recommended column of the "TLS
+Supported Groups" registry, defined in <span>[<a href="#RFC9847" class="cite xref">RFC9847</a>]</span>, records current IETF guidance on the
+use of registered groups. At the time of writing, X25519MLKEM768 (code point 4588) is
+the only PQ/T hybrid group marked Recommended.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">PQ/T hybrid key agreement is generally preferred, because the shared secret remains
+secure as long as either component algorithm remains unbroken <span>[<a href="#RFC9794" class="cite xref">RFC9794</a>]</span>. Standalone
+ML-KEM key agreement may be required for deployments subject to regulatory or compliance
+mandates that require exclusive use of post-quantum cryptography. The choice is a
+deployment decision and is out of scope for this document.<a href="#section-3-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="eaptls-authentication">
@@ -1348,16 +1357,33 @@ compromise. In such scenarios, an on-path attacker that is able to recover a ser
 private key within the certificate validity period could impersonate access points (APs)
 in real time, potentially deceiving users into revealing credentials or connecting to
 rogue networks.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">To mitigate these risks, TLS-based EAP deployments will need to adopt, over time, either
-PQ or PQ/T hybrid certificate-based authentication, as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01#section-5" class="relref">Section 5</a> of [<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span>.<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">The use of PQ or PQ/T hybrid certificates increases the size of individual certificates,
+<p id="section-4-4">To mitigate these risks, TLS-based EAP deployments <span class="bcp14">MUST</span> support at least one
+post-quantum or PQ/T hybrid signature scheme registered in the "TLS SignatureScheme"
+registry for authentication. ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span> is specified for use in X.509
+certificates in <span>[<a href="#RFC9881" class="cite xref">RFC9881</a>]</span> and for authentication in TLS 1.3 in <span>[<a href="#I-D.ietf-tls-mldsa" class="cite xref">I-D.ietf-tls-mldsa</a>]</span>.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">This document does not mandate a specific signature scheme or parameter set. The
+Recommended column of the "TLS SignatureScheme" registry, defined in <span>[<a href="#RFC9847" class="cite xref">RFC9847</a>]</span>, records
+current IETF guidance on the use of registered schemes.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">PQ/T hybrid authentication using composite signatures may be preferred by deployments
+seeking defense in depth during the transition, so that authentication remains secure as
+long as either component algorithm remains unbroken. Composite ML-DSA is specified for
+X.509 in <span>[<a href="#I-D.ietf-lamps-pq-composite-sigs" class="cite xref">I-D.ietf-lamps-pq-composite-sigs</a>]</span> and for TLS 1.3 in
+<span>[<a href="#I-D.reddy-tls-composite-mldsa" class="cite xref">I-D.reddy-tls-composite-mldsa</a>]</span>. The choice between pure post-quantum and PQ/T hybrid
+authentication is a deployment decision and is out of scope for this document.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">SLH-DSA <span>[<a href="#FIPS205" class="cite xref">FIPS205</a>]</span> is not considered suitable for TLS-based EAP methods. Its signatures
+are substantially larger than those of ML-DSA across all parameter sets, as shown in
+<span>[<a href="#RFC9958" class="cite xref">RFC9958</a>]</span>. The end-entity certificate and the CertificateVerify each carry a signature
+in every handshake, and neither can be avoided by the mechanism in <a href="#ext-extn" class="auto internal xref">Section 5</a>, which
+removes only intermediate certificates.<a href="#section-4-7" class="pilcrow">¶</a></p>
+<p id="section-4-8">A post-quantum or PQ/T hybrid end-entity certificate does not by itself provide
+post-quantum authentication. Every signature in the path up to the trust anchor has to
+use a post-quantum or PQ/T hybrid scheme, and since the trust anchor is provisioned out
+of band, it has to be in place before the certificates that chain to it are issued.<a href="#section-4-8" class="pilcrow">¶</a></p>
+<p id="section-4-9">The use of PQ or PQ/T hybrid certificates increases the size of individual certificates,
 certificate chains, and signatures, resulting in significantly larger handshake messages.
 These larger payloads can lead to packet fragmentation, retransmissions, and handshake
 delays, issues that are particularly disruptive in constrained or lossy network
-environments.<a href="#section-4-5" class="pilcrow">¶</a></p>
-<p id="section-4-6">To address these impacts, TLS-based EAP deployments can apply certificate chain
-optimization techniques outlined in Section 6.1 of <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> to reduce
-transmission overhead and improve handshake reliability.<a href="#section-4-6" class="pilcrow">¶</a></p>
+environments. <a href="#ext-extn" class="auto internal xref">Section 5</a> describes mitigations.<a href="#section-4-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ext-extn">
@@ -1371,72 +1397,77 @@ EST). The intermediate certificates are provided by the EAP server during the TL
 handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
 validate the certificate chain. This model assumes a managed deployment environment with
 explicitly configured trust relationships between the EAP client and EAP server.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">To further reduce handshake overhead, particularly in deployments using large certificate
-chains due to post-quantum (PQ) or composite certificates, this draft proposes an
+<p id="section-5-2">Certificate compression <span>[<a href="#RFC8879" class="cite xref">RFC8879</a>]</span> is largely ineffective against high-entropy
+post-quantum keys and signatures, and session resumption requires a prior full handshake.
+Out-of-band retrieval of the intermediate chain is therefore the only option for the
+first authentication of a newly provisioned device.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">To further reduce handshake overhead, particularly in deployments using large certificate
+chains due to post-quantum (PQ) or composite certificates, this document specifies an
 optimization that leverages the Enrollment over Secure Transport (EST) protocol
 <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, extended by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>. Specifically, it allows intermediate certificates
 to be retrieved in advance by using EST, thereby avoiding the need to transmit them
-during each TLS handshake.<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
+during each TLS handshake.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
 optimization described in this section applies to the certificates used in the outer TLS
-tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4">This section defines extensions to EST to support retrieval of the certificate chain used
+tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">This section defines extensions to EST to support retrieval of the certificate chain used
 by an EAP server and EAP clients. The first extension enables clients to obtain access to
-the complete set of published intermediate certificates of the EAP server.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<p id="section-5-5">A new path component is defined under the EST well-known URI:<a href="#section-5-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5-6">
+the complete set of published intermediate certificates of the EAP server.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6">A new path component is defined under the EST well-known URI:<a href="#section-5-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5-7">
 <pre>
 GET /.well-known/est/eapservercertchain
-</pre><a href="#section-5-6" class="pilcrow">¶</a>
+</pre><a href="#section-5-7" class="pilcrow">¶</a>
 </div>
-<p id="section-5-7">The '/eapservercertchain' is intended for informational retrieval only and does not
+<p id="section-5-8">The '/eapservercertchain' is intended for informational retrieval only and does not
 require client authentication. It allows clients to retrieve the intermediate certificate
 chain that the EAP server presents during TLS handshakes. This request is performed
 using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client
 authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span> be the same
-certificate chain the EAP server uses in a TLS-based EAP session.<a href="#section-5-7" class="pilcrow">¶</a></p>
-<p id="section-5-8">The second extension enables EAP servers to obtain access to the complete set of
+certificate chain the EAP server uses in a TLS-based EAP session.<a href="#section-5-8" class="pilcrow">¶</a></p>
+<p id="section-5-9">The second extension enables EAP servers to obtain access to the complete set of
 published intermediate certificates of the EAP clients. Rather than relying on static
 configuration, the EAP server can dynamically fetch the client's intermediate certificate
-chain from a trusted EST server within the same administrative domain.<a href="#section-5-8" class="pilcrow">¶</a></p>
-<p id="section-5-9">A new path component is defined under the EST well-known URI:<a href="#section-5-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5-10">
+chain from a trusted EST server within the same administrative domain.<a href="#section-5-9" class="pilcrow">¶</a></p>
+<p id="section-5-10">A new path component is defined under the EST well-known URI:<a href="#section-5-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5-11">
 <pre>
 GET /.well-known/est/eapclientcertchain
-</pre><a href="#section-5-10" class="pilcrow">¶</a>
+</pre><a href="#section-5-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5-11">The '/eapclientcertchain' is intended for informational retrieval only and does not
+<p id="section-5-12">The '/eapclientcertchain' is intended for informational retrieval only and does not
 require client authentication. It allows the EAP server to retrieve the intermediate
 certificate chain that the EAP clients present during TLS handshakes. This request is
 performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without
 requiring client authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span>
-be the same certificate chain EAP clients use in the TLS-based EAP session.<a href="#section-5-11" class="pilcrow">¶</a></p>
-<p id="section-5-12">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
+be the same certificate chain EAP clients use in the TLS-based EAP session.<a href="#section-5-12" class="pilcrow">¶</a></p>
+<p id="section-5-13">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
 via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
-ANIMA/BRSKI <span>[<a href="#RFC8995" class="cite xref">RFC8995</a>]</span>, EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, or out-of-band provisioning. The choice of
+BRSKI <span>[<a href="#RFC8995" class="cite xref">RFC8995</a>]</span>, EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, or out-of-band provisioning. The choice of
 bootstrapping mechanism is a deployment decision and is out of scope for this document.
 Certificate chains retrieved from an unauthenticated or untrusted EST server <span class="bcp14">MUST NOT</span> be
-used for TLS chain validation.<a href="#section-5-12" class="pilcrow">¶</a></p>
-<p id="section-5-13">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce
+used for TLS chain validation.<a href="#section-5-13" class="pilcrow">¶</a></p>
+<p id="section-5-14">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce
 latency and network overhead. However, they <span class="bcp14">SHOULD</span> implement mechanisms to detect changes
 or expiration. These include periodic re-fetching, honoring HTTP cache control headers
 (e.g., Cache-Control, ETag), and verifying the validity period of intermediate
-certificates.<a href="#section-5-13" class="pilcrow">¶</a></p>
-<p id="section-5-14">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
-been explicitly configured by the administrator to do so. Such configuration <span class="bcp14">SHOULD</span> only
-be applied in deployments where both the EAP client and EAP server support this
-specification and have completed EST pre-fetching as part of provisioning. If no such
+certificates.<a href="#section-5-14" class="pilcrow">¶</a></p>
+<p id="section-5-15">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
+been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
 configuration is present, the EAP client <span class="bcp14">MUST</span> include the full certificate chain in the
 TLS handshake. Similarly, an EAP server <span class="bcp14">MAY</span> omit intermediate certificates from the TLS
 handshake only if it has been explicitly configured by the administrator to do so.
 Administrators are advised to ensure that clients in the deployment have retrieved the
 server's intermediate certificates via EST as part of their provisioning process before
-enabling this configuration.<a href="#section-5-14" class="pilcrow">¶</a></p>
-<p id="section-5-15">Note: A TLS extension could be used to explicitly signal support for intermediate
+enabling this configuration.<a href="#section-5-15" class="pilcrow">¶</a></p>
+<p id="section-5-16">EST is one transport for retrieving intermediate certificates out of band. Device
+management systems can deliver the same chains, and TEAP <span>[<a href="#RFC7170" class="cite xref">RFC7170</a>]</span> could be extended to
+provision them within the tunnel it establishes.<a href="#section-5-16" class="pilcrow">¶</a></p>
+<p id="section-5-17">Note: A TLS extension could be used to explicitly signal support for intermediate
 certificate omission between peers, avoiding the need for administrator configuration.
 Such a mechanism is considered a possible future solution but is out of scope for this
-document.<a href="#section-5-15" class="pilcrow">¶</a></p>
+document.<a href="#section-5-17" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
@@ -1444,9 +1475,8 @@ document.<a href="#section-5-15" class="pilcrow">¶</a></p>
       <h2 id="name-security-considerations">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-6-1">The security considerations outlined in <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> and
-<span>[<a href="#I-D.ietf-pquip-pqc-engineers" class="cite xref">I-D.ietf-pquip-pqc-engineers</a>]</span> must be carefully evaluated and taken into account for
-all TLS-based EAP deployments.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-1">The security considerations outlined in <span>[<a href="#I-D.ietf-uta-pqc-app" class="cite xref">I-D.ietf-uta-pqc-app</a>]</span> and <span>[<a href="#RFC9958" class="cite xref">RFC9958</a>]</span> must be
+carefully evaluated and taken into account for all TLS-based EAP deployments.<a href="#section-6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1466,7 +1496,7 @@ registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
       <h2 id="name-acknowledgements">
 <a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
       </h2>
-<p id="section-8-1">Thanks to John Mattsson, Hannes Tschofenig, Alan Dekok and Michael Richardson for the discussion and comments.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-1">Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok and Michael Richardson for the discussion and comments.<a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1480,9 +1510,9 @@ registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.ietf-uta-pqc-app">[I-D.ietf-uta-pqc-app]</dt>
+<dt id="I-D.ietf-tls-mldsa">[I-D.ietf-tls-mldsa]</dt>
         <dd>
-<span class="refAuthor">Reddy.K, T.</span> and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Post-Quantum Cryptography Recommendations for TLS-based Applications"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-uta-pqc-app-01</span>, <time datetime="2026-02-24" class="refDate">24 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01">https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-01</a>&gt;</span>. </dd>
+<span class="refAuthor">Hollebeek, T.</span>, <span class="refAuthor">Schmieg, S.</span>, and <span class="refAuthor">B. Westerbaan</span>, <span class="refTitle">"Use of ML-DSA in TLS 1.3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tls-mldsa-06</span>, <time datetime="2026-09-11" class="refDate">11 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-mldsa-06">https://datatracker.ietf.org/doc/html/draft-ietf-tls-mldsa-06</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -1501,8 +1531,28 @@ registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <span class="refAuthor">Turner, S.</span>, <span class="refTitle">"EST (Enrollment over Secure Transport) Extensions"</span>, <span class="seriesInfo">RFC 8295</span>, <span class="seriesInfo">DOI 10.17487/RFC8295</span>, <time datetime="2018-01" class="refDate">January 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8295">https://www.rfc-editor.org/rfc/rfc8295</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9190">[RFC9190]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Preuß Mattsson, J.</span> and <span class="refAuthor">M. Sethi</span>, <span class="refTitle">"EAP-TLS 1.3: Using the Extensible Authentication Protocol with TLS 1.3"</span>, <span class="seriesInfo">RFC 9190</span>, <span class="seriesInfo">DOI 10.17487/RFC9190</span>, <time datetime="2022-02" class="refDate">February 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9190">https://www.rfc-editor.org/rfc/rfc9190</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9846">[RFC9846]</dt>
+        <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 9846</span>, <span class="seriesInfo">DOI 10.17487/RFC9846</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9846">https://www.rfc-editor.org/rfc/rfc9846</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9847">[RFC9847]</dt>
+        <dd>
+<span class="refAuthor">Salowey, J.</span> and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"IANA Registry Updates for TLS and DTLS"</span>, <span class="seriesInfo">RFC 9847</span>, <span class="seriesInfo">DOI 10.17487/RFC9847</span>, <time datetime="2025-12" class="refDate">December 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9847">https://www.rfc-editor.org/rfc/rfc9847</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9881">[RFC9881]</dt>
+        <dd>
+<span class="refAuthor">Massimo, J.</span>, <span class="refAuthor">Kampanakis, P.</span>, <span class="refAuthor">Turner, S.</span>, and <span class="refAuthor">B. E. Westerbaan</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure -- Algorithm Identifiers for the Module-Lattice-Based Digital Signature Algorithm (ML-DSA)"</span>, <span class="seriesInfo">RFC 9881</span>, <span class="seriesInfo">DOI 10.17487/RFC9881</span>, <time datetime="2025-10" class="refDate">October 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9881">https://www.rfc-editor.org/rfc/rfc9881</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9954">[RFC9954]</dt>
+        <dd>
+<span class="refAuthor">Stebila, D.</span>, <span class="refAuthor">Fluhrer, S.</span>, and <span class="refAuthor">S. Gueron</span>, <span class="refTitle">"Hybrid Key Exchange in TLS 1.3"</span>, <span class="seriesInfo">RFC 9954</span>, <span class="seriesInfo">DOI 10.17487/RFC9954</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9954">https://www.rfc-editor.org/rfc/rfc9954</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC10024">[RFC10024]</dt>
+      <dd>
+<span class="refAuthor">Kwiatkowski, K.</span>, <span class="refAuthor">Kampanakis, P.</span>, <span class="refAuthor">Westerbaan, B. E.</span>, and <span class="refAuthor">D. Stebila</span>, <span class="refTitle">"Post-Quantum Traditional (PQ/T) Hybrid Key Agreement Mechanisms for TLS 1.3"</span>, <span class="seriesInfo">RFC 10024</span>, <span class="seriesInfo">DOI 10.17487/RFC10024</span>, <time datetime="2026-08" class="refDate">August 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc10024">https://www.rfc-editor.org/rfc/rfc10024</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -1525,13 +1575,17 @@ registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
         <dd>
 <span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Stateless Hash-Based Digital Signature Standard"</span>, <span class="seriesInfo">FIPS 205</span>, <time datetime="2024" class="refDate">2024</time>. </dd>
 <dd class="break"></dd>
-<dt id="I-D.ietf-pquip-pqc-engineers">[I-D.ietf-pquip-pqc-engineers]</dt>
+<dt id="I-D.ietf-lamps-pq-composite-sigs">[I-D.ietf-lamps-pq-composite-sigs]</dt>
         <dd>
-<span class="refAuthor">Banerjee, A.</span>, <span class="refAuthor">Reddy.K, T.</span>, <span class="refAuthor">Schoinianakis, D.</span>, <span class="refAuthor">Hollebeek, T.</span>, and <span class="refAuthor">M. Ounsworth</span>, <span class="refTitle">"Post-Quantum Cryptography for Engineers"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-pquip-pqc-engineers-14</span>, <time datetime="2025-08-25" class="refDate">25 August 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqc-engineers-14">https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqc-engineers-14</a>&gt;</span>. </dd>
+<span class="refAuthor">Ounsworth, M.</span>, <span class="refAuthor">Gray, J.</span>, <span class="refAuthor">Pala, M.</span>, <span class="refAuthor">Klaußner, J.</span>, and <span class="refAuthor">S. Fluhrer</span>, <span class="refTitle">"Composite Module-Lattice-Based Digital Signature Algorithm (ML-DSA) for use in X.509 Public Key Infrastructure"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-pq-composite-sigs-19</span>, <time datetime="2026-04-21" class="refDate">21 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="I-D.ietf-pquip-pqt-hybrid-terminology">[I-D.ietf-pquip-pqt-hybrid-terminology]</dt>
+<dt id="I-D.ietf-uta-pqc-app">[I-D.ietf-uta-pqc-app]</dt>
         <dd>
-<span class="refAuthor">D, F.</span>, <span class="refAuthor">P, M.</span>, and <span class="refAuthor">B. Hale</span>, <span class="refTitle">"Terminology for Post-Quantum Traditional Hybrid Schemes"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-pquip-pqt-hybrid-terminology-06</span>, <time datetime="2025-01-10" class="refDate">10 January 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqt-hybrid-terminology-06">https://datatracker.ietf.org/doc/html/draft-ietf-pquip-pqt-hybrid-terminology-06</a>&gt;</span>. </dd>
+<span class="refAuthor">Reddy.K, T.</span> and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Post-Quantum Cryptography Recommendations for TLS-based Applications"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-uta-pqc-app-03</span>, <time datetime="2026-07-04" class="refDate">4 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-03">https://datatracker.ietf.org/doc/html/draft-ietf-uta-pqc-app-03</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.reddy-tls-composite-mldsa">[I-D.reddy-tls-composite-mldsa]</dt>
+        <dd>
+<span class="refAuthor">Reddy.K, T.</span>, <span class="refAuthor">Hollebeek, T.</span>, <span class="refAuthor">Gray, J.</span>, <span class="refAuthor">Fluhrer, S.</span>, and <span class="refAuthor">D. Van Geest</span>, <span class="refTitle">"Use of Composite ML-DSA in TLS 1.3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-reddy-tls-composite-mldsa-12</span>, <time datetime="2026-08-31" class="refDate">31 August 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-reddy-tls-composite-mldsa-12">https://datatracker.ietf.org/doc/html/draft-reddy-tls-composite-mldsa-12</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC5281">[RFC5281]</dt>
         <dd>
@@ -1541,13 +1595,25 @@ registry entries are required.<a href="#section-7-1" class="pilcrow">¶</a></p>
         <dd>
 <span class="refAuthor">Zhou, H.</span>, <span class="refAuthor">Cam-Winget, N.</span>, <span class="refAuthor">Salowey, J.</span>, and <span class="refAuthor">S. Hanna</span>, <span class="refTitle">"Tunnel Extensible Authentication Protocol (TEAP) Version 1"</span>, <span class="seriesInfo">RFC 7170</span>, <span class="seriesInfo">DOI 10.17487/RFC7170</span>, <time datetime="2014-05" class="refDate">May 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7170">https://www.rfc-editor.org/rfc/rfc7170</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC8879">[RFC8879]</dt>
+        <dd>
+<span class="refAuthor">Ghedini, A.</span> and <span class="refAuthor">V. Vasiliev</span>, <span class="refTitle">"TLS Certificate Compression"</span>, <span class="seriesInfo">RFC 8879</span>, <span class="seriesInfo">DOI 10.17487/RFC8879</span>, <time datetime="2020-12" class="refDate">December 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8879">https://www.rfc-editor.org/rfc/rfc8879</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8995">[RFC8995]</dt>
         <dd>
 <span class="refAuthor">Pritikin, M.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Eckert, T.</span>, <span class="refAuthor">Behringer, M.</span>, and <span class="refAuthor">K. Watsen</span>, <span class="refTitle">"Bootstrapping Remote Secure Key Infrastructure (BRSKI)"</span>, <span class="seriesInfo">RFC 8995</span>, <span class="seriesInfo">DOI 10.17487/RFC8995</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8995">https://www.rfc-editor.org/rfc/rfc8995</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9191">[RFC9191]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Sethi, M.</span>, <span class="refAuthor">Preuß Mattsson, J.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Handling Large Certificates and Long Certificate Chains in TLS-Based EAP Methods"</span>, <span class="seriesInfo">RFC 9191</span>, <span class="seriesInfo">DOI 10.17487/RFC9191</span>, <time datetime="2022-02" class="refDate">February 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9191">https://www.rfc-editor.org/rfc/rfc9191</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9794">[RFC9794]</dt>
+        <dd>
+<span class="refAuthor">Driscoll, F.</span>, <span class="refAuthor">Parsons, M.</span>, and <span class="refAuthor">B. Hale</span>, <span class="refTitle">"Terminology for Post-Quantum Traditional Hybrid Schemes"</span>, <span class="seriesInfo">RFC 9794</span>, <span class="seriesInfo">DOI 10.17487/RFC9794</span>, <time datetime="2025-06" class="refDate">June 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9794">https://www.rfc-editor.org/rfc/rfc9794</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9958">[RFC9958]</dt>
+      <dd>
+<span class="refAuthor">Banerjee, A.</span>, <span class="refAuthor">Reddy.K, T.</span>, <span class="refAuthor">Schoinianakis, D.</span>, <span class="refAuthor">Hollebeek, T.</span>, and <span class="refAuthor">M. Ounsworth</span>, <span class="refTitle">"Post-Quantum Cryptography for Engineers"</span>, <span class="seriesInfo">RFC 9958</span>, <span class="seriesInfo">DOI 10.17487/RFC9958</span>, <time datetime="2026-06" class="refDate">June 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9958">https://www.rfc-editor.org/rfc/rfc9958</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

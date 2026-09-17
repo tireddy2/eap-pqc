@@ -4,30 +4,29 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                            6 April 2026
-Expires: 8 October 2026
+Intended status: Standards Track                       17 September 2026
+Expires: 21 March 2027
 
 
            Post-Quantum Enhancements to TLS-Based EAP Methods
-                   draft-reddy-emu-pqc-eap-tls-latest
+                   draft-ietf-emu-pqc-eap-tls-latest
 
 Abstract
 
-   This document proposes enhancements to TLS-based EAP methods,
-   including the Extensible Authentication Protocol with Transport Layer
-   Security (EAP-TLS), EAP Tunneled TLS (EAP-TTLS), Protected EAP
-   (PEAP), and EAP Tunnel Method (TEAP), to incorporate post-quantum
-   cryptographic mechanisms.  It also addresses challenges related to
-   large certificate sizes and long certificate chains, as identified in
-   [RFC9191], and provides recommendations for integrating PQC
-   algorithms into TLS-based EAP deployments.
+   This document specifies the use of post-quantum cryptography in TLS-
+   based EAP methods, including the Extensible Authentication Protocol
+   with Transport Layer Security (EAP-TLS), EAP Tunneled TLS (EAP-TTLS),
+   Protected EAP (PEAP), and EAP Tunnel Method (TEAP).  It also
+   addresses challenges related to large certificate sizes and long
+   certificate chains, as identified in [RFC9191], and specifies a
+   mechanism to reduce TLS handshake size.
 
 About This Document
 
    This note is to be removed before publishing as an RFC.
 
    Status information for this document may be found at
-   https://datatracker.ietf.org/doc/draft-reddy-emu-pqc-eap-tls/.
+   https://datatracker.ietf.org/doc/draft-ietf-emu-pqc-eap-tls/.
 
    Discussion of this document takes place on the EAP Method Update
    Working Group mailing list (mailto:emu@ietf.org), which is archived
@@ -49,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 October 2026.
+   This Internet-Draft will expire on 21 March 2027.
 
 Copyright Notice
 
@@ -89,10 +88,9 @@ Table of Contents
    infrastructure with post-quantum cryptographic (PQC) algorithms
    designed to resist attacks from both quantum and classical
    adversaries.  The cryptographic primitives requiring replacement are
-   discussed in [I-D.ietf-pquip-pqc-engineers], and the NIST PQC
-   Standardization process has initially selected algorithms such as ML-
-   KEM [FIPS203], ML-DSA [FIPS204], and SLH-DSA [FIPS205] for usage in
-   security protocols.
+   discussed in [RFC9958], and the NIST PQC Standardization process has
+   initially selected algorithms such as ML-KEM [FIPS203], ML-DSA
+   [FIPS204], and SLH-DSA [FIPS205] for usage in security protocols.
 
    To mitigate the risks posed by a CRQC, such as the potential
    compromise of encrypted data and the forging of digital signatures,
@@ -114,10 +112,10 @@ Table of Contents
    certificate chains tend to be significantly larger than their
    traditional counterparts, further exacerbating these issues by
    increasing TLS handshake sizes and the likelihood of session
-   failures.  To address these challenges, this draft proposes
-   mitigation strategies that enable the use of PQC within TLS-based EAP
-   methods, ensuring secure and efficient authentication even in
-   constrained network environments.
+   failures.  To address these challenges, this document specifies post-
+   quantum key agreement and authentication requirements for TLS-based
+   EAP methods, together with a mechanism that reduces TLS handshake
+   size for use in constrained network environments.
 
 2.  Conventions and Definitions
 
@@ -127,10 +125,9 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   This document adopts terminology defined in
-   [I-D.ietf-pquip-pqt-hybrid-terminology].  For the purposes of this
-   document, it is useful to categorize cryptographic algorithms into
-   three distinct classes:
+   This document adopts terminology defined in [RFC9794].  For the
+   purposes of this document, it is useful to categorize cryptographic
+   algorithms into three distinct classes:
 
    *  Traditional Algorithm: An asymmetric cryptographic algorithm based
       on integer factorization, finite field discrete logarithms, or
@@ -192,19 +189,36 @@ Table of Contents
    *  Client credentials used in certificate-based authentication (e.g.,
       usernames, device or organization identifiers).
 
-   To preserve the intended privacy guarantees of TLS 1.3 and to protect
-   against HNDL attacks, TLS-based EAP deployments that require long-
-   term confidentiality will need to adopt post-quantum key exchange
-   mechanisms, as outlined in Section 4 of [I-D.ietf-uta-pqc-app].
+   In the case of EAP-TTLS, PEAP, and TEAP, HNDL attacks present an
+   additional threat.  These methods typically carry legacy inner
+   authentication protocols within the outer TLS tunnel, such as MS-
+   CHAPv2.  If a CRQC is used to break the outer TLS tunnel, the exposed
+   inner authentication exchange could enable offline password attacks,
+   potentially allowing an adversary to recover user credentials.
 
-   These mechanisms ensure that even if handshake data is recorded
-   today, it cannot be decrypted in the future, maintaining the
-   confidentiality and privacy of the TLS session.
+   To protect against HNDL attacks, TLS-based EAP deployments that
+   require long-term confidentiality MUST use TLS 1.3 [RFC9846] and MUST
+   negotiate a post-quantum or PQ/T hybrid key agreement group.
+   Traditional key agreement groups alone do not provide long-term
+   confidentiality against an adversary equipped with a CRQC.
 
-   Furthermore, to support hybrid or PQC-only key exchange in bandwidth
-   or latency-constrained EAP deployments, EAP clients and servers
-   should apply the optimizations described in Section 4.1 of
-   [I-D.ietf-uta-pqc-app] to minimize performance overhead.
+   EAP peers and EAP servers MUST support at least one post-quantum or
+   PQ/T hybrid key agreement group registered in the "TLS Supported
+   Groups" registry.  PQ/T hybrid groups combining ML-KEM with ECDHE are
+   constructed as described in [RFC9954] and registered in [RFC10024].
+
+   This document does not mandate a specific group.  The Recommended
+   column of the "TLS Supported Groups" registry, defined in [RFC9847],
+   records current IETF guidance on the use of registered groups.  At
+   the time of writing, X25519MLKEM768 (code point 4588) is the only PQ/
+   T hybrid group marked Recommended.
+
+   PQ/T hybrid key agreement is generally preferred, because the shared
+   secret remains secure as long as either component algorithm remains
+   unbroken [RFC9794].  Standalone ML-KEM key agreement may be required
+   for deployments subject to regulatory or compliance mandates that
+   require exclusive use of post-quantum cryptography.  The choice is a
+   deployment decision and is out of scope for this document.
 
 4.  Post-Quantum Authentication in TLS-Based EAP Methods
 
@@ -234,21 +248,46 @@ Table of Contents
    points (APs) in real time, potentially deceiving users into revealing
    credentials or connecting to rogue networks.
 
-   To mitigate these risks, TLS-based EAP deployments will need to
-   adopt, over time, either PQ or PQ/T hybrid certificate-based
-   authentication, as described in Section 5 of [I-D.ietf-uta-pqc-app].
+   To mitigate these risks, TLS-based EAP deployments MUST support at
+   least one post-quantum or PQ/T hybrid signature scheme registered in
+   the "TLS SignatureScheme" registry for authentication.  ML-DSA
+   [FIPS204] is specified for use in X.509 certificates in [RFC9881] and
+   for authentication in TLS 1.3 in [I-D.ietf-tls-mldsa].
+
+   This document does not mandate a specific signature scheme or
+   parameter set.  The Recommended column of the "TLS SignatureScheme"
+   registry, defined in [RFC9847], records current IETF guidance on the
+   use of registered schemes.
+
+   PQ/T hybrid authentication using composite signatures may be
+   preferred by deployments seeking defense in depth during the
+   transition, so that authentication remains secure as long as either
+   component algorithm remains unbroken.  Composite ML-DSA is specified
+   for X.509 in [I-D.ietf-lamps-pq-composite-sigs] and for TLS 1.3 in
+   [I-D.reddy-tls-composite-mldsa].  The choice between pure post-
+   quantum and PQ/T hybrid authentication is a deployment decision and
+   is out of scope for this document.
+
+   SLH-DSA [FIPS205] is not considered suitable for TLS-based EAP
+   methods.  Its signatures are substantially larger than those of ML-
+   DSA across all parameter sets, as shown in [RFC9958].  The end-entity
+   certificate and the CertificateVerify each carry a signature in every
+   handshake, and neither can be avoided by the mechanism in Section 5,
+   which removes only intermediate certificates.
+
+   A post-quantum or PQ/T hybrid end-entity certificate does not by
+   itself provide post-quantum authentication.  Every signature in the
+   path up to the trust anchor has to use a post-quantum or PQ/T hybrid
+   scheme, and since the trust anchor is provisioned out of band, it has
+   to be in place before the certificates that chain to it are issued.
 
    The use of PQ or PQ/T hybrid certificates increases the size of
    individual certificates, certificate chains, and signatures,
    resulting in significantly larger handshake messages.  These larger
    payloads can lead to packet fragmentation, retransmissions, and
    handshake delays, issues that are particularly disruptive in
-   constrained or lossy network environments.
-
-   To address these impacts, TLS-based EAP deployments can apply
-   certificate chain optimization techniques outlined in Section 6.1 of
-   [I-D.ietf-uta-pqc-app] to reduce transmission overhead and improve
-   handshake reliability.
+   constrained or lossy network environments.  Section 5 describes
+   mitigations.
 
 5.  EST Integration
 
@@ -261,13 +300,19 @@ Table of Contents
    managed deployment environment with explicitly configured trust
    relationships between the EAP client and EAP server.
 
+   Certificate compression [RFC8879] is largely ineffective against
+   high-entropy post-quantum keys and signatures, and session resumption
+   requires a prior full handshake.  Out-of-band retrieval of the
+   intermediate chain is therefore the only option for the first
+   authentication of a newly provisioned device.
+
    To further reduce handshake overhead, particularly in deployments
    using large certificate chains due to post-quantum (PQ) or composite
-   certificates, this draft proposes an optimization that leverages the
-   Enrollment over Secure Transport (EST) protocol [RFC7030], extended
-   by [RFC8295].  Specifically, it allows intermediate certificates to
-   be retrieved in advance by using EST, thereby avoiding the need to
-   transmit them during each TLS handshake.
+   certificates, this document specifies an optimization that leverages
+   the Enrollment over Secure Transport (EST) protocol [RFC7030],
+   extended by [RFC8295].  Specifically, it allows intermediate
+   certificates to be retrieved in advance by using EST, thereby
+   avoiding the need to transmit them during each TLS handshake.
 
    For EAP methods that use TLS as an outer tunnel (e.g., PEAP and
    TEAP), the EST optimization described in this section applies to the
@@ -318,9 +363,9 @@ Table of Contents
    trust anchor obtained via a suitable bootstrapping mechanism before
    retrieving intermediate certificate chains via HTTPS.  Various
    bootstrapping mechanisms exist for establishing this trust, such as
-   ANIMA/BRSKI [RFC8995], EST [RFC7030], or out-of-band provisioning.
-   The choice of bootstrapping mechanism is a deployment decision and is
-   out of scope for this document.  Certificate chains retrieved from an
+   BRSKI [RFC8995], EST [RFC7030], or out-of-band provisioning.  The
+   choice of bootstrapping mechanism is a deployment decision and is out
+   of scope for this document.  Certificate chains retrieved from an
    unauthenticated or untrusted EST server MUST NOT be used for TLS
    chain validation.
 
@@ -333,16 +378,21 @@ Table of Contents
 
    EAP clients MAY omit intermediate certificates from the TLS handshake
    only if they have been explicitly configured by the administrator to
-   do so.  Such configuration SHOULD only be applied in deployments
-   where both the EAP client and EAP server support this specification
-   and have completed EST pre-fetching as part of provisioning.  If no
-   such configuration is present, the EAP client MUST include the full
+   do so.  Such configuration is recommended only in deployments where
+   both the EAP client and EAP server support this specification and
+   have completed EST pre-fetching as part of provisioning.  If no such
+   configuration is present, the EAP client MUST include the full
    certificate chain in the TLS handshake.  Similarly, an EAP server MAY
    omit intermediate certificates from the TLS handshake only if it has
    been explicitly configured by the administrator to do so.
    Administrators are advised to ensure that clients in the deployment
    have retrieved the server's intermediate certificates via EST as part
    of their provisioning process before enabling this configuration.
+
+   EST is one transport for retrieving intermediate certificates out of
+   band.  Device management systems can deliver the same chains, and
+   TEAP [RFC7170] could be extended to provision them within the tunnel
+   it establishes.
 
    Note: A TLS extension could be used to explicitly signal support for
    intermediate certificate omission between peers, avoiding the need
@@ -352,8 +402,8 @@ Table of Contents
 6.  Security Considerations
 
    The security considerations outlined in [I-D.ietf-uta-pqc-app] and
-   [I-D.ietf-pquip-pqc-engineers] must be carefully evaluated and taken
-   into account for all TLS-based EAP deployments.
+   [RFC9958] must be carefully evaluated and taken into account for all
+   TLS-based EAP deployments.
 
 7.  IANA Considerations
 
@@ -366,19 +416,19 @@ Table of Contents
 
 Acknowledgements
 
-   Thanks to John Mattsson, Hannes Tschofenig, Alan Dekok and Michael
+   Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok and Michael
    Richardson for the discussion and comments.
 
 References
 
 Normative References
 
-   [I-D.ietf-uta-pqc-app]
-              Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
-              Recommendations for TLS-based Applications", Work in
-              Progress, Internet-Draft, draft-ietf-uta-pqc-app-01, 24
-              February 2026, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-uta-pqc-app-01>.
+   [I-D.ietf-tls-mldsa]
+              Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
+              DSA in TLS 1.3", Work in Progress, Internet-Draft, draft-
+              ietf-tls-mldsa-06, 11 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
+              mldsa-06>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -403,6 +453,31 @@ Normative References
               RFC 9190, DOI 10.17487/RFC9190, February 2022,
               <https://www.rfc-editor.org/rfc/rfc9190>.
 
+   [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
+              <https://www.rfc-editor.org/rfc/rfc9846>.
+
+   [RFC9847]  Salowey, J. and S. Turner, "IANA Registry Updates for TLS
+              and DTLS", RFC 9847, DOI 10.17487/RFC9847, December 2025,
+              <https://www.rfc-editor.org/rfc/rfc9847>.
+
+   [RFC9881]  Massimo, J., Kampanakis, P., Turner, S., and B. E.
+              Westerbaan, "Internet X.509 Public Key Infrastructure --
+              Algorithm Identifiers for the Module-Lattice-Based Digital
+              Signature Algorithm (ML-DSA)", RFC 9881,
+              DOI 10.17487/RFC9881, October 2025,
+              <https://www.rfc-editor.org/rfc/rfc9881>.
+
+   [RFC9954]  Stebila, D., Fluhrer, S., and S. Gueron, "Hybrid Key
+              Exchange in TLS 1.3", RFC 9954, DOI 10.17487/RFC9954, July
+              2026, <https://www.rfc-editor.org/rfc/rfc9954>.
+
+   [RFC10024] Kwiatkowski, K., Kampanakis, P., Westerbaan, B. E., and D.
+              Stebila, "Post-Quantum Traditional (PQ/T) Hybrid Key
+              Agreement Mechanisms for TLS 1.3", RFC 10024,
+              DOI 10.17487/RFC10024, August 2026,
+              <https://www.rfc-editor.org/rfc/rfc10024>.
+
 Informative References
 
    [FIPS203]  National Institute of Standards and Technology (NIST),
@@ -417,20 +492,29 @@ Informative References
               "Stateless Hash-Based Digital Signature Standard",
               FIPS 205, 2024.
 
-   [I-D.ietf-pquip-pqc-engineers]
-              Banerjee, A., Reddy.K, T., Schoinianakis, D., Hollebeek,
-              T., and M. Ounsworth, "Post-Quantum Cryptography for
-              Engineers", Work in Progress, Internet-Draft, draft-ietf-
-              pquip-pqc-engineers-14, 25 August 2025,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-pquip-
-              pqc-engineers-14>.
+   [I-D.ietf-lamps-pq-composite-sigs]
+              Ounsworth, M., Gray, J., Pala, M., Klaußner, J., and S.
+              Fluhrer, "Composite Module-Lattice-Based Digital Signature
+              Algorithm (ML-DSA) for use in X.509 Public Key
+              Infrastructure", Work in Progress, Internet-Draft, draft-
+              ietf-lamps-pq-composite-sigs-19, 21 April 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-lamps-
+              pq-composite-sigs-19>.
 
-   [I-D.ietf-pquip-pqt-hybrid-terminology]
-              D, F., P, M., and B. Hale, "Terminology for Post-Quantum
-              Traditional Hybrid Schemes", Work in Progress, Internet-
-              Draft, draft-ietf-pquip-pqt-hybrid-terminology-06, 10
-              January 2025, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-pquip-pqt-hybrid-terminology-06>.
+   [I-D.ietf-uta-pqc-app]
+              Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
+              Recommendations for TLS-based Applications", Work in
+              Progress, Internet-Draft, draft-ietf-uta-pqc-app-03, 4
+              July 2026, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-uta-pqc-app-03>.
+
+   [I-D.reddy-tls-composite-mldsa]
+              Reddy.K, T., Hollebeek, T., Gray, J., Fluhrer, S., and D.
+              Van Geest, "Use of Composite ML-DSA in TLS 1.3", Work in
+              Progress, Internet-Draft, draft-reddy-tls-composite-mldsa-
+              12, 31 August 2026,
+              <https://datatracker.ietf.org/doc/html/draft-reddy-tls-
+              composite-mldsa-12>.
 
    [RFC5281]  Funk, P. and S. Blake-Wilson, "Extensible Authentication
               Protocol Tunneled Transport Layer Security Authenticated
@@ -443,6 +527,10 @@ Informative References
               1", RFC 7170, DOI 10.17487/RFC7170, May 2014,
               <https://www.rfc-editor.org/rfc/rfc7170>.
 
+   [RFC8879]  Ghedini, A. and V. Vasiliev, "TLS Certificate
+              Compression", RFC 8879, DOI 10.17487/RFC8879, December
+              2020, <https://www.rfc-editor.org/rfc/rfc8879>.
+
    [RFC8995]  Pritikin, M., Richardson, M., Eckert, T., Behringer, M.,
               and K. Watsen, "Bootstrapping Remote Secure Key
               Infrastructure (BRSKI)", RFC 8995, DOI 10.17487/RFC8995,
@@ -452,6 +540,16 @@ Informative References
               Large Certificates and Long Certificate Chains in TLS-
               Based EAP Methods", RFC 9191, DOI 10.17487/RFC9191,
               February 2022, <https://www.rfc-editor.org/rfc/rfc9191>.
+
+   [RFC9794]  Driscoll, F., Parsons, M., and B. Hale, "Terminology for
+              Post-Quantum Traditional Hybrid Schemes", RFC 9794,
+              DOI 10.17487/RFC9794, June 2025,
+              <https://www.rfc-editor.org/rfc/rfc9794>.
+
+   [RFC9958]  Banerjee, A., Reddy.K, T., Schoinianakis, D., Hollebeek,
+              T., and M. Ounsworth, "Post-Quantum Cryptography for
+              Engineers", RFC 9958, DOI 10.17487/RFC9958, June 2026,
+              <https://www.rfc-editor.org/rfc/rfc9958>.
 
 Author's Address
 
