@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-17T04:25:47.447376+00:00",
+  "timestamp": "2026-09-20T04:25:55.041462+00:00",
   "repo": "tireddy2/eap-pqc",
   "labels": [
     {
@@ -173,6 +173,34 @@
       "mergedBy": "tireddy2",
       "mergeCommit": {
         "oid": "4cabc5ad603a66d26fe7897e6d85d3fe35a3393c"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOPGMMNc8AAAABD6EQdA",
+      "title": "Updates to draft to address feedback from the WG",
+      "url": "https://github.com/tireddy2/eap-pqc/pull/5",
+      "state": "MERGED",
+      "author": "tireddy2",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-09-17T10:08:48Z",
+      "updatedAt": "2026-09-17T10:09:15Z",
+      "baseRepository": "tireddy2/eap-pqc",
+      "baseRefName": "main",
+      "baseRefOid": "4cabc5ad603a66d26fe7897e6d85d3fe35a3393c",
+      "headRepository": "tireddy2/eap-pqc",
+      "headRefName": "tireddy2-patch-4",
+      "headRefOid": "61f4d39f18307dd0d4e744cde864e87b8ed36118",
+      "closedAt": "2026-09-17T10:09:14Z",
+      "mergedAt": "2026-09-17T10:09:14Z",
+      "mergedBy": "tireddy2",
+      "mergeCommit": {
+        "oid": "e964d31a0b7bfce221c145d6e6c68de044014a1c"
       },
       "comments": [],
       "reviews": []
