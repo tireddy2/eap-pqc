@@ -235,9 +235,9 @@ private key within the certificate validity period could impersonate access poin
 in real time, potentially deceiving users into revealing credentials or connecting to
 rogue networks.
 
-To mitigate these risks, TLS-based EAP deployments MUST support at least one
-post-quantum or PQ/T hybrid signature scheme registered in the "TLS SignatureScheme"
-registry for authentication. ML-DSA {{FIPS204}} is specified for use in X.509
+To mitigate these risks, TLS-based EAP deployments that require resistance to future
+CRQCs MUST support at least one post-quantum or PQ/T hybrid signature scheme registered
+in the "TLS SignatureScheme" registry for authentication. ML-DSA {{FIPS204}} is specified for use in X.509
 certificates in {{RFC9881}} and for authentication in TLS 1.3 in {{I-D.ietf-tls-mldsa}}.
 
 This document does not mandate a specific signature scheme or parameter set. The
@@ -251,11 +251,12 @@ X.509 in {{I-D.ietf-lamps-pq-composite-sigs}} and for TLS 1.3 in
 {{I-D.reddy-tls-composite-mldsa}}. The choice between pure post-quantum and PQ/T hybrid
 authentication is a deployment decision and is out of scope for this document.
 
-SLH-DSA {{FIPS205}} is not considered suitable for TLS-based EAP methods. Its signatures
-are substantially larger than those of ML-DSA across all parameter sets, as shown in
-{{RFC9958}}. The end-entity certificate and the CertificateVerify each carry a signature
-in every handshake, and neither can be avoided by the mechanism in {{ext-extn}}, which
-removes only intermediate certificates.
+The relatively large SLH-DSA {{FIPS205}} signatures may make SLH-DSA less suitable for
+TLS-based EAP deployments, particularly where handshake size and fragmentation are
+significant constraints. Signature sizes are given in {{RFC9958}}. The end-entity
+certificate and the CertificateVerify each carry a signature in every handshake, and
+neither can be avoided by the mechanism in {{ext-extn}}, which removes only intermediate
+certificates.
 
 A post-quantum or PQ/T hybrid end-entity certificate does not by itself provide
 post-quantum authentication. Every signature in the path up to the trust anchor has to
@@ -277,10 +278,10 @@ handshake. The EAP client relies solely on the pre-provisioned trust anchor to b
 validate the certificate chain. This model assumes a managed deployment environment with
 explicitly configured trust relationships between the EAP client and EAP server.
 
-Certificate compression {{RFC8879}} is largely ineffective against high-entropy
-post-quantum keys and signatures, and session resumption requires a prior full handshake.
-Out-of-band retrieval of the intermediate chain is therefore the only option for the
-first authentication of a newly provisioned device.
+Certificate compression {{RFC8879}} provides limited benefit for certificates containing
+large high-entropy post-quantum public keys and signatures, and session resumption
+requires a prior full handshake. Out-of-band provisioning of the intermediate chain can
+avoid transmitting it during the first TLS authentication of a newly provisioned device.
 
 To further reduce handshake overhead, particularly in deployments using large certificate
 chains due to post-quantum (PQ) or composite certificates, this document specifies an
@@ -294,8 +295,9 @@ optimization described in this section applies to the certificates used in the o
 tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.
 
 This section defines extensions to EST to support retrieval of the certificate chain used
-by an EAP server and EAP clients. The first extension enables clients to obtain access to
-the complete set of published intermediate certificates of the EAP server.
+by an EAP server and EAP clients. The first extension enables EAP clients to retrieve the
+intermediate certificates required to build a certification path to the EAP server's
+end-entity certificate.
 
 A new path component is defined under the EST well-known URI:
 
@@ -307,11 +309,11 @@ The '/eapservercertchain' is intended for informational retrieval only and does 
 require client authentication. It allows clients to retrieve the intermediate certificate
 chain that the EAP server presents during TLS handshakes. This request is performed
 using the HTTPS protocol. The EST server MUST support requests without requiring client
-authentication. The certificate chain provided by the EST server MUST be the same
-certificate chain the EAP server uses in a TLS-based EAP session.
+authentication. The EST server MUST provide the intermediate
+certificates of the CAs that issue EAP server certificates.
 
-The second extension enables EAP servers to obtain access to the complete set of
-published intermediate certificates of the EAP clients. Rather than relying on static
+The second extension enables EAP servers to retrieve the intermediate certificates
+required to build a certification path to the EAP clients' end-entity certificates. Rather than relying on static
 configuration, the EAP server can dynamically fetch the client's intermediate certificate
 chain from a trusted EST server within the same administrative domain.
 
@@ -325,8 +327,15 @@ The '/eapclientcertchain' is intended for informational retrieval only and does 
 require client authentication. It allows the EAP server to retrieve the intermediate
 certificate chain that the EAP clients present during TLS handshakes. This request is
 performed using the HTTPS protocol. The EST server MUST support requests without
-requiring client authentication. The certificate chain provided by the EST server MUST
-be the same certificate chain EAP clients use in the TLS-based EAP session.
+requiring client authentication. The EST server MUST provide the intermediate
+certificates of the CAs that issue EAP client certificates.
+
+Retrieved intermediate certificates are used for certification path construction together
+with any certificates received in the TLS handshake. Where an EAP server has certificates
+issued by more than one CA, the retrieved intermediate certificates cover all of them, and
+the EAP client selects those needed to construct a path for the certificate presented in
+the handshake. If no valid path can be constructed, authentication fails as for any other
+certificate validation failure.
 
 EAP clients and servers MUST authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
