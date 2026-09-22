@@ -53,6 +53,7 @@ informative:
   RFC5281:
   RFC7170:
   RFC8879:
+  RFC8990:
   RFC8995:
   RFC9794:
   RFC9958:
@@ -271,12 +272,19 @@ environments. {{ext-extn}} describes mitigations.
 
 # EST Integration {#ext-extn}
 
-The EAP client is expected to validate the certificate presented by the EAP server using
-a trust anchor that is provisioned out-of-band prior to authentication (e.g., using
-EST). The intermediate certificates are provided by the EAP server during the TLS
-handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
+When configured to do so, the EAP client validates the certificate presented by the EAP
+server using a trust anchor provisioned out of band prior to authentication. The
+intermediate certificates are provided by the EAP server during the TLS handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
 validate the certificate chain. This model assumes a managed deployment environment with
 explicitly configured trust relationships between the EAP client and EAP server.
+
+Trust anchor provisioning and initial retrieval of intermediate certificates take place
+during device onboarding, before the device has network access through the EAP
+authentication described in this document. BRSKI {{RFC8995}} is one such onboarding
+mechanism, in which the registrar acts as the EST server and the pledge (the EAP client)
+reaches it through a Join Proxy. The EAP client discovers the EST server as part of the
+onboarding mechanism. For instance, in BRSKI the pledge discovers the registrar using
+GRASP {{RFC8990}}, and this document does not define a separate discovery mechanism.
 
 Certificate compression {{RFC8879}} provides limited benefit for certificates containing
 large high-entropy post-quantum public keys and signatures, and session resumption
