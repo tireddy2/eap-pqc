@@ -14,26 +14,26 @@ Authentication Protocol with Transport Layer Security (EAP-TLS), EAP Tunneled TL
 challenges related to large certificate sizes and long certificate chains, as identified
 in  , and specifies a mechanism to reduce TLS handshake size. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="PQC" name="keyword">
 <meta content="PQ/T Hybrid" name="keyword">
 <meta content="TLS" name="keyword">
 <meta content="EAP" name="keyword">
 <meta content="draft-ietf-emu-pqc-eap-tls-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
+  xml2rfc 3.34.1
     Python 3.14.7
-    ConfigArgParse 1.7.5
+    ConfigArgParse 1.7.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.7
+    platformdirs 4.11.10
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.3
+    wcwidth 0.8.4
 -->
 <link href="draft-ietf-emu-pqc-eap-tls.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1053,7 +1053,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Reddy</td>
-<td class="center">Expires 21 March 2027</td>
+<td class="center">Expires 26 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,12 +1066,12 @@ svg {
 <dd class="internet-draft">draft-ietf-emu-pqc-eap-tls-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-17" class="published">17 September 2026</time>
+<time datetime="2026-09-22" class="published">22 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-21">21 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-26">26 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1123,7 +1123,7 @@ in <span>[<a href="#RFC9191" class="cite xref">RFC9191</a>]</span>, and specifie
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1357,9 +1357,9 @@ compromise. In such scenarios, an on-path attacker that is able to recover a ser
 private key within the certificate validity period could impersonate access points (APs)
 in real time, potentially deceiving users into revealing credentials or connecting to
 rogue networks.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">To mitigate these risks, TLS-based EAP deployments <span class="bcp14">MUST</span> support at least one
-post-quantum or PQ/T hybrid signature scheme registered in the "TLS SignatureScheme"
-registry for authentication. ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span> is specified for use in X.509
+<p id="section-4-4">To mitigate these risks, TLS-based EAP deployments that require resistance to future
+CRQCs <span class="bcp14">MUST</span> support at least one post-quantum or PQ/T hybrid signature scheme registered
+in the "TLS SignatureScheme" registry for authentication. ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span> is specified for use in X.509
 certificates in <span>[<a href="#RFC9881" class="cite xref">RFC9881</a>]</span> and for authentication in TLS 1.3 in <span>[<a href="#I-D.ietf-tls-mldsa" class="cite xref">I-D.ietf-tls-mldsa</a>]</span>.<a href="#section-4-4" class="pilcrow">¶</a></p>
 <p id="section-4-5">This document does not mandate a specific signature scheme or parameter set. The
 Recommended column of the "TLS SignatureScheme" registry, defined in <span>[<a href="#RFC9847" class="cite xref">RFC9847</a>]</span>, records
@@ -1370,11 +1370,12 @@ long as either component algorithm remains unbroken. Composite ML-DSA is specifi
 X.509 in <span>[<a href="#I-D.ietf-lamps-pq-composite-sigs" class="cite xref">I-D.ietf-lamps-pq-composite-sigs</a>]</span> and for TLS 1.3 in
 <span>[<a href="#I-D.reddy-tls-composite-mldsa" class="cite xref">I-D.reddy-tls-composite-mldsa</a>]</span>. The choice between pure post-quantum and PQ/T hybrid
 authentication is a deployment decision and is out of scope for this document.<a href="#section-4-6" class="pilcrow">¶</a></p>
-<p id="section-4-7">SLH-DSA <span>[<a href="#FIPS205" class="cite xref">FIPS205</a>]</span> is not considered suitable for TLS-based EAP methods. Its signatures
-are substantially larger than those of ML-DSA across all parameter sets, as shown in
-<span>[<a href="#RFC9958" class="cite xref">RFC9958</a>]</span>. The end-entity certificate and the CertificateVerify each carry a signature
-in every handshake, and neither can be avoided by the mechanism in <a href="#ext-extn" class="auto internal xref">Section 5</a>, which
-removes only intermediate certificates.<a href="#section-4-7" class="pilcrow">¶</a></p>
+<p id="section-4-7">The relatively large SLH-DSA <span>[<a href="#FIPS205" class="cite xref">FIPS205</a>]</span> signatures may make SLH-DSA less suitable for
+TLS-based EAP deployments, particularly where handshake size and fragmentation are
+significant constraints. Signature sizes are given in <span>[<a href="#RFC9958" class="cite xref">RFC9958</a>]</span>. The end-entity
+certificate and the CertificateVerify each carry a signature in every handshake, and
+neither can be avoided by the mechanism in <a href="#ext-extn" class="auto internal xref">Section 5</a>, which removes only intermediate
+certificates.<a href="#section-4-7" class="pilcrow">¶</a></p>
 <p id="section-4-8">A post-quantum or PQ/T hybrid end-entity certificate does not by itself provide
 post-quantum authentication. Every signature in the path up to the trust anchor has to
 use a post-quantum or PQ/T hybrid scheme, and since the trust anchor is provisioned out
@@ -1397,10 +1398,10 @@ EST). The intermediate certificates are provided by the EAP server during the TL
 handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
 validate the certificate chain. This model assumes a managed deployment environment with
 explicitly configured trust relationships between the EAP client and EAP server.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">Certificate compression <span>[<a href="#RFC8879" class="cite xref">RFC8879</a>]</span> is largely ineffective against high-entropy
-post-quantum keys and signatures, and session resumption requires a prior full handshake.
-Out-of-band retrieval of the intermediate chain is therefore the only option for the
-first authentication of a newly provisioned device.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-2">Certificate compression <span>[<a href="#RFC8879" class="cite xref">RFC8879</a>]</span> provides limited benefit for certificates containing
+large high-entropy post-quantum public keys and signatures, and session resumption
+requires a prior full handshake. Out-of-band provisioning of the intermediate chain can
+avoid transmitting it during the first TLS authentication of a newly provisioned device.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">To further reduce handshake overhead, particularly in deployments using large certificate
 chains due to post-quantum (PQ) or composite certificates, this document specifies an
 optimization that leverages the Enrollment over Secure Transport (EST) protocol
@@ -1411,8 +1412,9 @@ during each TLS handshake.<a href="#section-5-3" class="pilcrow">¶</a></p>
 optimization described in this section applies to the certificates used in the outer TLS
 tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-4" class="pilcrow">¶</a></p>
 <p id="section-5-5">This section defines extensions to EST to support retrieval of the certificate chain used
-by an EAP server and EAP clients. The first extension enables clients to obtain access to
-the complete set of published intermediate certificates of the EAP server.<a href="#section-5-5" class="pilcrow">¶</a></p>
+by an EAP server and EAP clients. The first extension enables EAP clients to retrieve the
+intermediate certificates required to build a certification path to the EAP server's
+end-entity certificate.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">A new path component is defined under the EST well-known URI:<a href="#section-5-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5-7">
 <pre>
@@ -1423,10 +1425,10 @@ GET /.well-known/est/eapservercertchain
 require client authentication. It allows clients to retrieve the intermediate certificate
 chain that the EAP server presents during TLS handshakes. This request is performed
 using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client
-authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span> be the same
-certificate chain the EAP server uses in a TLS-based EAP session.<a href="#section-5-8" class="pilcrow">¶</a></p>
-<p id="section-5-9">The second extension enables EAP servers to obtain access to the complete set of
-published intermediate certificates of the EAP clients. Rather than relying on static
+authentication. The EST server <span class="bcp14">MUST</span> provide the intermediate
+certificates of the CAs that issue EAP server certificates.<a href="#section-5-8" class="pilcrow">¶</a></p>
+<p id="section-5-9">The second extension enables EAP servers to retrieve the intermediate certificates
+required to build a certification path to the EAP clients' end-entity certificates. Rather than relying on static
 configuration, the EAP server can dynamically fetch the client's intermediate certificate
 chain from a trusted EST server within the same administrative domain.<a href="#section-5-9" class="pilcrow">¶</a></p>
 <p id="section-5-10">A new path component is defined under the EST well-known URI:<a href="#section-5-10" class="pilcrow">¶</a></p>
@@ -1439,35 +1441,41 @@ GET /.well-known/est/eapclientcertchain
 require client authentication. It allows the EAP server to retrieve the intermediate
 certificate chain that the EAP clients present during TLS handshakes. This request is
 performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without
-requiring client authentication. The certificate chain provided by the EST server <span class="bcp14">MUST</span>
-be the same certificate chain EAP clients use in the TLS-based EAP session.<a href="#section-5-12" class="pilcrow">¶</a></p>
-<p id="section-5-13">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
+requiring client authentication. The EST server <span class="bcp14">MUST</span> provide the intermediate
+certificates of the CAs that issue EAP client certificates.<a href="#section-5-12" class="pilcrow">¶</a></p>
+<p id="section-5-13">Retrieved intermediate certificates are used for certification path construction together
+with any certificates received in the TLS handshake. Where an EAP server has certificates
+issued by more than one CA, the retrieved intermediate certificates cover all of them, and
+the EAP client selects those needed to construct a path for the certificate presented in
+the handshake. If no valid path can be constructed, authentication fails as for any other
+certificate validation failure.<a href="#section-5-13" class="pilcrow">¶</a></p>
+<p id="section-5-14">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
 via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
 BRSKI <span>[<a href="#RFC8995" class="cite xref">RFC8995</a>]</span>, EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, or out-of-band provisioning. The choice of
 bootstrapping mechanism is a deployment decision and is out of scope for this document.
 Certificate chains retrieved from an unauthenticated or untrusted EST server <span class="bcp14">MUST NOT</span> be
-used for TLS chain validation.<a href="#section-5-13" class="pilcrow">¶</a></p>
-<p id="section-5-14">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce
+used for TLS chain validation.<a href="#section-5-14" class="pilcrow">¶</a></p>
+<p id="section-5-15">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains to reduce
 latency and network overhead. However, they <span class="bcp14">SHOULD</span> implement mechanisms to detect changes
 or expiration. These include periodic re-fetching, honoring HTTP cache control headers
 (e.g., Cache-Control, ETag), and verifying the validity period of intermediate
-certificates.<a href="#section-5-14" class="pilcrow">¶</a></p>
-<p id="section-5-15">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
+certificates.<a href="#section-5-15" class="pilcrow">¶</a></p>
+<p id="section-5-16">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
 been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
 configuration is present, the EAP client <span class="bcp14">MUST</span> include the full certificate chain in the
 TLS handshake. Similarly, an EAP server <span class="bcp14">MAY</span> omit intermediate certificates from the TLS
 handshake only if it has been explicitly configured by the administrator to do so.
 Administrators are advised to ensure that clients in the deployment have retrieved the
 server's intermediate certificates via EST as part of their provisioning process before
-enabling this configuration.<a href="#section-5-15" class="pilcrow">¶</a></p>
-<p id="section-5-16">EST is one transport for retrieving intermediate certificates out of band. Device
+enabling this configuration.<a href="#section-5-16" class="pilcrow">¶</a></p>
+<p id="section-5-17">EST is one transport for retrieving intermediate certificates out of band. Device
 management systems can deliver the same chains, and TEAP <span>[<a href="#RFC7170" class="cite xref">RFC7170</a>]</span> could be extended to
-provision them within the tunnel it establishes.<a href="#section-5-16" class="pilcrow">¶</a></p>
-<p id="section-5-17">Note: A TLS extension could be used to explicitly signal support for intermediate
+provision them within the tunnel it establishes.<a href="#section-5-17" class="pilcrow">¶</a></p>
+<p id="section-5-18">Note: A TLS extension could be used to explicitly signal support for intermediate
 certificate omission between peers, avoiding the need for administrator configuration.
 Such a mechanism is considered a possible future solution but is out of scope for this
-document.<a href="#section-5-17" class="pilcrow">¶</a></p>
+document.<a href="#section-5-18" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
