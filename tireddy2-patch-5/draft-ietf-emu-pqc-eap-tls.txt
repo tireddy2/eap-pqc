@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                       21 September 2026
-Expires: 25 March 2027
+Intended status: Standards Track                       23 September 2026
+Expires: 27 March 2027
 
 
            Post-Quantum Enhancements to TLS-Based EAP Methods
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 March 2027.
+   This Internet-Draft will expire on 27 March 2027.
 
 Copyright Notice
 
@@ -293,14 +293,24 @@ Table of Contents
 
 5.  EST Integration
 
-   The EAP client is expected to validate the certificate presented by
-   the EAP server using a trust anchor that is provisioned out-of-band
-   prior to authentication (e.g., using EST).  The intermediate
-   certificates are provided by the EAP server during the TLS handshake.
-   The EAP client relies solely on the pre-provisioned trust anchor to
-   build and validate the certificate chain.  This model assumes a
-   managed deployment environment with explicitly configured trust
-   relationships between the EAP client and EAP server.
+   When configured to do so, the EAP client validates the certificate
+   presented by the EAP server using a trust anchor provisioned out of
+   band prior to authentication.  The intermediate certificates are
+   provided by the EAP server during the TLS handshake.  The EAP client
+   relies solely on the pre-provisioned trust anchor to build and
+   validate the certificate chain.  This model assumes a managed
+   deployment environment with explicitly configured trust relationships
+   between the EAP client and EAP server.
+
+   Trust anchor provisioning and initial retrieval of intermediate
+   certificates take place during device onboarding, before the device
+   has network access through the EAP authentication described in this
+   document.  BRSKI [RFC8995] is one such onboarding mechanism, in which
+   the registrar acts as the EST server and the pledge (the EAP client)
+   reaches it through a Join Proxy.  The EAP client discovers the EST
+   server as part of the onboarding mechanism.  For instance, in BRSKI
+   the pledge discovers the registrar using GRASP [RFC8990], and this
+   document does not define a separate discovery mechanism.
 
    Certificate compression [RFC8879] provides limited benefit for
    certificates containing large high-entropy post-quantum public keys
@@ -544,6 +554,11 @@ Informative References
    [RFC8879]  Ghedini, A. and V. Vasiliev, "TLS Certificate
               Compression", RFC 8879, DOI 10.17487/RFC8879, December
               2020, <https://www.rfc-editor.org/rfc/rfc8879>.
+
+   [RFC8990]  Bormann, C., Carpenter, B., Ed., and B. Liu, Ed., "GeneRic
+              Autonomic Signaling Protocol (GRASP)", RFC 8990,
+              DOI 10.17487/RFC8990, May 2021,
+              <https://www.rfc-editor.org/rfc/rfc8990>.
 
    [RFC8995]  Pritikin, M., Richardson, M., Eckert, T., Behringer, M.,
               and K. Watsen, "Bootstrapping Remote Secure Key
