@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-22T04:19:27.949325+00:00",
+  "timestamp": "2026-09-24T04:12:22.860414+00:00",
   "repo": "tireddy2/eap-pqc",
   "labels": [
     {
@@ -210,24 +210,54 @@
       "id": "PR_kwDOPGMMNc8AAAABEaIZ9g",
       "title": "Further updates to the draft",
       "url": "https://github.com/tireddy2/eap-pqc/pull/6",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "tireddy2",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-09-21T11:09:08Z",
-      "updatedAt": "2026-09-21T11:09:08Z",
+      "updatedAt": "2026-09-22T06:42:58Z",
       "baseRepository": "tireddy2/eap-pqc",
       "baseRefName": "main",
       "baseRefOid": "0cc7f89a5f63457a30a0acf45bdb0902c39d43d9",
       "headRepository": "tireddy2/eap-pqc",
       "headRefName": "tireddy2-patch-5",
       "headRefOid": "5d5fdd96dc420d2a94760aa7384c491c20d0ae92",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-09-22T06:42:58Z",
+      "mergedAt": "2026-09-22T06:42:58Z",
+      "mergedBy": "tireddy2",
+      "mergeCommit": {
+        "oid": "f5fdc584ce62beb8694ef79370d1c961f034e864"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOPGMMNc8AAAABEiJ-kQ",
+      "title": "Address comments from Alan",
+      "url": "https://github.com/tireddy2/eap-pqc/pull/7",
+      "state": "MERGED",
+      "author": "tireddy2",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-09-22T06:44:06Z",
+      "updatedAt": "2026-09-23T12:45:08Z",
+      "baseRepository": "tireddy2/eap-pqc",
+      "baseRefName": "tireddy2-patch-5",
+      "baseRefOid": "5d5fdd96dc420d2a94760aa7384c491c20d0ae92",
+      "headRepository": "tireddy2/eap-pqc",
+      "headRefName": "tireddy2-patch-6",
+      "headRefOid": "41a80f6d8d25f979ea77605e636eef717ef8d48d",
+      "closedAt": "2026-09-23T12:45:08Z",
+      "mergedAt": "2026-09-23T12:45:08Z",
+      "mergedBy": "tireddy2",
+      "mergeCommit": {
+        "oid": "10082aa00ae26e0d4ff51ad0d8af4a0482352565"
+      },
       "comments": [],
       "reviews": []
     }
