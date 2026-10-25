@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                       22 September 2026
-Expires: 26 March 2027
+Intended status: Standards Track                         25 October 2026
+Expires: 28 April 2027
 
 
            Post-Quantum Enhancements to TLS-Based EAP Methods
@@ -20,18 +20,6 @@ Abstract
    addresses challenges related to large certificate sizes and long
    certificate chains, as identified in [RFC9191], and specifies a
    mechanism to reduce TLS handshake size.
-
-About This Document
-
-   This note is to be removed before publishing as an RFC.
-
-   Status information for this document may be found at
-   https://datatracker.ietf.org/doc/draft-ietf-emu-pqc-eap-tls/.
-
-   Discussion of this document takes place on the EAP Method Update
-   Working Group mailing list (mailto:emu@ietf.org), which is archived
-   at https://mailarchive.ietf.org/arch/browse/emu.  Subscribe at
-   https://www.ietf.org/mailman/listinfo/emu/.
 
 Status of This Memo
 
@@ -48,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 March 2027.
+   This Internet-Draft will expire on 28 April 2027.
 
 Copyright Notice
 
@@ -73,10 +61,10 @@ Table of Contents
    5.  EST Integration
    6.  Security Considerations
    7.  IANA Considerations
-   Acknowledgements
-   References
-     Normative References
-     Informative References
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
+   Acknowledgments
    Author's Address
 
 1.  Introduction
@@ -101,9 +89,11 @@ Table of Contents
    widely used for network access authentication in enterprise and
    wireless environments.  This document applies to all EAP methods that
    use TLS as their underlying transport, including EAP-TLS [RFC9190],
-   EAP-TTLS [RFC5281], PEAP, and TEAP [RFC7170].  To continue providing
-   long-term confidentiality and authentication guarantees, these
-   methods must evolve to incorporate post-quantum algorithms.
+   EAP-TTLS [RFC5281], PEAP [MS-PEAP], and TEAP [RFC9930].  The use of
+   TLS 1.3 with EAP-TTLS and PEAP is specified in [RFC9427].  To
+   continue providing long-term confidentiality and authentication
+   guarantees, these methods must evolve to incorporate post-quantum
+   algorithms.
 
    However, transitioning these protocols to support PQC introduces
    practical challenges.  [RFC9191] highlights issues related to large
@@ -147,12 +137,10 @@ Table of Contents
       signature algorithms:
 
       -  Hybrid Key Exchange: A key exchange mechanism that combines two
-         component algorithms
-
-         o  one traditional algorithm and one post-quantum algorithm.
-            The resulting shared secret remains secure as long as at
-            least one of the component key exchange algorithms remains
-            unbroken.
+         component algorithms, one traditional algorithm and one post-
+         quantum algorithm.  The resulting shared secret remains secure
+         as long as at least one of the component key exchange
+         algorithms remains unbroken.
 
       -  PQ/T Hybrid Digital Signature: A multi-algorithm digital
          signature scheme composed of two or more component signature
@@ -325,7 +313,10 @@ Table of Contents
    the Enrollment over Secure Transport (EST) protocol [RFC7030],
    extended by [RFC8295].  Specifically, it allows intermediate
    certificates to be retrieved in advance by using EST, thereby
-   avoiding the need to transmit them during each TLS handshake.
+   avoiding the need to transmit them during each TLS handshake.  The
+   optimization applies only when every EAP client that authenticates to
+   the EAP server has retrieved its intermediate certificates as part of
+   provisioning.
 
    For EAP methods that use TLS as an outer tunnel (e.g., PEAP and
    TEAP), the EST optimization described in this section applies to the
@@ -374,14 +365,20 @@ Table of Contents
    the intermediate certificates of the CAs that issue EAP client
    certificates.
 
-   Retrieved intermediate certificates are used for certification path
-   construction together with any certificates received in the TLS
-   handshake.  Where an EAP server has certificates issued by more than
-   one CA, the retrieved intermediate certificates cover all of them,
-   and the EAP client selects those needed to construct a path for the
-   certificate presented in the handshake.  If no valid path can be
-   constructed, authentication fails as for any other certificate
-   validation failure.
+   The response to /eapservercertchain and /eapclientcertchain uses the
+   format of the /cacerts response defined in Section 4.1.3 of
+   [RFC7030], as updated by [RFC8951], and carries only intermediate CA
+   certificates.
+
+   Retrieved intermediate certificates are used, together with any
+   certificates received in the TLS handshake, to construct a
+   certification path from the end-entity certificate to the pre-
+   provisioned trust anchor.  Where an EAP server has certificates
+   issued by more than one CA, the retrieved intermediate certificates
+   cover all of them, and the EAP client selects those needed to
+   construct a path for the certificate presented in the handshake.  If
+   no valid path can be constructed, authentication fails as for any
+   other certificate validation failure.
 
    EAP clients and servers MUST authenticate the EST server using a
    trust anchor obtained via a suitable bootstrapping mechanism before
@@ -394,11 +391,9 @@ Table of Contents
    chain validation.
 
    EAP servers and clients are RECOMMENDED to cache retrieved
-   certificate chains to reduce latency and network overhead.  However,
-   they SHOULD implement mechanisms to detect changes or expiration.
-   These include periodic re-fetching, honoring HTTP cache control
-   headers (e.g., Cache-Control, ETag), and verifying the validity
-   period of intermediate certificates.
+   certificate chains.  They SHOULD re-fetch them periodically,
+   following HTTP caching rules [RFC9111], and before cached
+   intermediate certificates expire.
 
    EAP clients MAY omit intermediate certificates from the TLS handshake
    only if they have been explicitly configured by the administrator to
@@ -415,7 +410,7 @@ Table of Contents
 
    EST is one transport for retrieving intermediate certificates out of
    band.  Device management systems can deliver the same chains, and
-   TEAP [RFC7170] could be extended to provision them within the tunnel
+   TEAP [RFC9930] could be extended to provision them within the tunnel
    it establishes.
 
    Note: A TLS extension could be used to explicitly signal support for
@@ -424,6 +419,12 @@ Table of Contents
    possible future solution but is out of scope for this document.
 
 6.  Security Considerations
+
+   The security considerations of [RFC7030] and [RFC8295] apply to the
+   EST extensions defined in Section 5.  If an intermediate CA
+   certificate is renewed or replaced and the peer omits it from the TLS
+   handshake, path construction fails until the cached intermediate
+   certificates are refreshed.
 
    The security considerations outlined in [I-D.ietf-uta-pqc-app] and
    [RFC9958] must be carefully evaluated and taken into account for all
@@ -438,14 +439,9 @@ Table of Contents
    registered '/.well-known/est/' prefix defined in [RFC7030], no new
    IANA registry entries are required.
 
-Acknowledgements
+8.  References
 
-   Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok and Michael
-   Richardson for the discussion and comments.
-
-References
-
-Normative References
+8.1.  Normative References
 
    [I-D.ietf-tls-mldsa]
               Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
@@ -472,10 +468,20 @@ Normative References
               Extensions", RFC 8295, DOI 10.17487/RFC8295, January 2018,
               <https://www.rfc-editor.org/rfc/rfc8295>.
 
+   [RFC8951]  Richardson, M., Werner, T., and W. Pan, "Clarification of
+              Enrollment over Secure Transport (EST): Transfer Encodings
+              and ASN.1", RFC 8951, DOI 10.17487/RFC8951, November 2020,
+              <https://www.rfc-editor.org/rfc/rfc8951>.
+
    [RFC9190]  Preuß Mattsson, J. and M. Sethi, "EAP-TLS 1.3: Using the
               Extensible Authentication Protocol with TLS 1.3",
               RFC 9190, DOI 10.17487/RFC9190, February 2022,
               <https://www.rfc-editor.org/rfc/rfc9190>.
+
+   [RFC9427]  DeKok, A., "TLS-Based Extensible Authentication Protocol
+              (EAP) Types for Use with TLS 1.3", RFC 9427,
+              DOI 10.17487/RFC9427, June 2023,
+              <https://www.rfc-editor.org/rfc/rfc9427>.
 
    [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
               Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
@@ -502,7 +508,7 @@ Normative References
               DOI 10.17487/RFC10024, August 2026,
               <https://www.rfc-editor.org/rfc/rfc10024>.
 
-Informative References
+8.2.  Informative References
 
    [FIPS203]  National Institute of Standards and Technology (NIST),
               "Module-Lattice-Based Key-Encapsulation Mechanism
@@ -540,16 +546,15 @@ Informative References
               <https://datatracker.ietf.org/doc/html/draft-reddy-tls-
               composite-mldsa-12>.
 
+   [MS-PEAP]  Microsoft, "[MS-PEAP]: Protected Extensible Authentication
+              Protocol (PEAP)", <https://learn.microsoft.com/en-
+              us/openspecs/windows_protocols/ms-peap/>.
+
    [RFC5281]  Funk, P. and S. Blake-Wilson, "Extensible Authentication
               Protocol Tunneled Transport Layer Security Authenticated
               Protocol Version 0 (EAP-TTLSv0)", RFC 5281,
               DOI 10.17487/RFC5281, August 2008,
               <https://www.rfc-editor.org/rfc/rfc5281>.
-
-   [RFC7170]  Zhou, H., Cam-Winget, N., Salowey, J., and S. Hanna,
-              "Tunnel Extensible Authentication Protocol (TEAP) Version
-              1", RFC 7170, DOI 10.17487/RFC7170, May 2014,
-              <https://www.rfc-editor.org/rfc/rfc7170>.
 
    [RFC8879]  Ghedini, A. and V. Vasiliev, "TLS Certificate
               Compression", RFC 8879, DOI 10.17487/RFC8879, December
@@ -565,6 +570,11 @@ Informative References
               Infrastructure (BRSKI)", RFC 8995, DOI 10.17487/RFC8995,
               May 2021, <https://www.rfc-editor.org/rfc/rfc8995>.
 
+   [RFC9111]  Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Caching", STD 98, RFC 9111,
+              DOI 10.17487/RFC9111, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9111>.
+
    [RFC9191]  Sethi, M., Preuß Mattsson, J., and S. Turner, "Handling
               Large Certificates and Long Certificate Chains in TLS-
               Based EAP Methods", RFC 9191, DOI 10.17487/RFC9191,
@@ -575,10 +585,20 @@ Informative References
               DOI 10.17487/RFC9794, June 2025,
               <https://www.rfc-editor.org/rfc/rfc9794>.
 
+   [RFC9930]  DeKok, A., Ed., "Tunnel Extensible Authentication Protocol
+              (TEAP) Version 1", RFC 9930, DOI 10.17487/RFC9930,
+              February 2026, <https://www.rfc-editor.org/rfc/rfc9930>.
+
    [RFC9958]  Banerjee, A., Reddy.K, T., Schoinianakis, D., Hollebeek,
               T., and M. Ounsworth, "Post-Quantum Cryptography for
               Engineers", RFC 9958, DOI 10.17487/RFC9958, June 2026,
               <https://www.rfc-editor.org/rfc/rfc9958>.
+
+Acknowledgments
+
+   Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael
+   Richardson, Junjun Chen, and Guilin Wang for the discussion and
+   comments.
 
 Author's Address
 
