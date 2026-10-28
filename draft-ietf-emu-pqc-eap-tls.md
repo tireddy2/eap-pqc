@@ -47,15 +47,18 @@ normative:
   RFC10024:
   RFC7030:
   RFC8295:
+  RFC8951:
+  RFC9427:
   I-D.ietf-tls-mldsa:
 
 informative:
   RFC5281:
-  RFC7170:
+  RFC9930:
   RFC8879:
   RFC8995:
   RFC9794:
   RFC9958:
+  RFC9111:
   I-D.ietf-uta-pqc-app:
   I-D.ietf-lamps-pq-composite-sigs:
   I-D.reddy-tls-composite-mldsa:
@@ -80,6 +83,11 @@ informative:
     date: 2024
     seriesinfo:
       "FIPS": "205"
+  MS-PEAP:
+    title: "[MS-PEAP]: Protected Extensible Authentication Protocol (PEAP)"
+    author:
+      org: "Microsoft"
+    target: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-peap/
 
 ---
 
@@ -113,7 +121,8 @@ adversaries capture encrypted traffic today with the intent to decrypt it once C
 become available. TLS-based EAP methods are widely used for network access
 authentication in enterprise and wireless environments. This document applies to all EAP
 methods that use TLS as their underlying transport, including EAP-TLS {{RFC9190}},
-EAP-TTLS {{RFC5281}}, PEAP, and TEAP {{RFC7170}}. To continue providing long-term
+EAP-TTLS {{RFC5281}}, PEAP {{MS-PEAP}}, and TEAP {{RFC9930}}. The use of TLS 1.3 with
+EAP-TTLS and PEAP is specified in {{RFC9427}}. To continue providing long-term
 confidentiality and authentication guarantees, these methods must evolve to incorporate
 post-quantum algorithms.
 
@@ -288,7 +297,9 @@ chains due to post-quantum (PQ) or composite certificates, this document specifi
 optimization that leverages the Enrollment over Secure Transport (EST) protocol
 {{RFC7030}}, extended by {{RFC8295}}. Specifically, it allows intermediate certificates
 to be retrieved in advance by using EST, thereby avoiding the need to transmit them
-during each TLS handshake.
+during each TLS handshake. The optimization applies only when every EAP client that
+authenticates to the EAP server has retrieved its intermediate certificates as part of
+provisioning.
 
 For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
 optimization described in this section applies to the certificates used in the outer TLS
@@ -330,8 +341,13 @@ performed using the HTTPS protocol. The EST server MUST support requests without
 requiring client authentication. The EST server MUST provide the intermediate
 certificates of the CAs that issue EAP client certificates.
 
-Retrieved intermediate certificates are used for certification path construction together
-with any certificates received in the TLS handshake. Where an EAP server has certificates
+The response to '/eapservercertchain' and '/eapclientcertchain' uses the format of the
+'/cacerts' response defined in {{Section 4.1.3 of RFC7030}}, as updated by {{RFC8951}},
+and carries only intermediate CA certificates.
+
+Retrieved intermediate certificates are used, together with any certificates received in
+the TLS handshake, to construct a certification path from the end-entity certificate to
+the pre-provisioned trust anchor. Where an EAP server has certificates
 issued by more than one CA, the retrieved intermediate certificates cover all of them, and
 the EAP client selects those needed to construct a path for the certificate presented in
 the handshake. If no valid path can be constructed, authentication fails as for any other
@@ -345,11 +361,9 @@ bootstrapping mechanism is a deployment decision and is out of scope for this do
 Certificate chains retrieved from an unauthenticated or untrusted EST server MUST NOT be
 used for TLS chain validation.
 
-EAP servers and clients are RECOMMENDED to cache retrieved certificate chains to reduce
-latency and network overhead. However, they SHOULD implement mechanisms to detect changes
-or expiration. These include periodic re-fetching, honoring HTTP cache control headers
-(e.g., Cache-Control, ETag), and verifying the validity period of intermediate
-certificates.
+EAP servers and clients are RECOMMENDED to cache retrieved certificate chains. They
+SHOULD re-fetch them periodically, following HTTP caching rules {{RFC9111}}, and before
+cached intermediate certificates expire.
 
 EAP clients MAY omit intermediate certificates from the TLS handshake only if they have
 been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
@@ -361,7 +375,7 @@ server's intermediate certificates via EST as part of their provisioning process
 enabling this configuration.
 
 EST is one transport for retrieving intermediate certificates out of band. Device
-management systems can deliver the same chains, and TEAP {{RFC7170}} could be extended to
+management systems can deliver the same chains, and TEAP {{RFC9930}} could be extended to
 provision them within the tunnel it establishes.
 
 Note: A TLS extension could be used to explicitly signal support for intermediate
@@ -370,6 +384,11 @@ Such a mechanism is considered a possible future solution but is out of scope fo
 document.
 
 # Security Considerations
+
+The security considerations of {{RFC7030}} and {{RFC8295}} apply to the EST extensions
+defined in {{ext-extn}}. If an intermediate CA certificate is renewed or replaced and the
+peer omits it from the TLS handshake, path construction fails until the cached
+intermediate certificates are refreshed.
 
 The security considerations outlined in {{I-D.ietf-uta-pqc-app}} and {{RFC9958}} must be
 carefully evaluated and taken into account for all TLS-based EAP deployments.
@@ -385,4 +404,4 @@ registry entries are required.
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok and Michael Richardson for the discussion and comments.
+Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael Richardson, Junjun Chen, and Guilin Wang for the discussion and comments.
