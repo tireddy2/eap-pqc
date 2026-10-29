@@ -61,7 +61,7 @@ informative:
   RFC9111:
   I-D.ietf-uta-pqc-app:
   I-D.ietf-lamps-pq-composite-sigs:
-  I-D.reddy-tls-composite-mldsa:
+  I-D.ietf-tls-composite-mldsa:
   FIPS203:
     title: "Module-Lattice-Based Key-Encapsulation Mechanism Standard"
     author:
@@ -253,12 +253,9 @@ This document does not mandate a specific signature scheme or parameter set. The
 Recommended column of the "TLS SignatureScheme" registry, defined in {{RFC9847}}, records
 current IETF guidance on the use of registered schemes.
 
-PQ/T hybrid authentication using composite signatures may be preferred by deployments
-seeking defense in depth during the transition, so that authentication remains secure as
-long as either component algorithm remains unbroken. Composite ML-DSA is specified for
-X.509 in {{I-D.ietf-lamps-pq-composite-sigs}} and for TLS 1.3 in
-{{I-D.reddy-tls-composite-mldsa}}. The choice between pure post-quantum and PQ/T hybrid
-authentication is a deployment decision and is out of scope for this document.
+Composite ML-DSA is specified for X.509 in {{I-D.ietf-lamps-pq-composite-sigs}} and for
+TLS 1.3 in {{I-D.ietf-tls-composite-mldsa}}. The choice between pure post-quantum and PQ/T
+hybrid authentication is a deployment decision; {{ops}} discusses the considerations.
 
 The relatively large SLH-DSA {{FIPS205}} signatures may make SLH-DSA less suitable for
 TLS-based EAP deployments, particularly where handshake size and fragmentation are
@@ -382,6 +379,25 @@ Note: A TLS extension could be used to explicitly signal support for intermediat
 certificate omission between peers, avoiding the need for administrator configuration.
 Such a mechanism is considered a possible future solution but is out of scope for this
 document.
+
+# Operational Considerations {#ops}
+
+TLS-based EAP is typically deployed in managed environments. The administrator selects the
+certificate algorithm, the CA issues certificates accordingly, and both EAP servers and EAP
+peers are provisioned to match. The signature scheme is then negotiated in the TLS
+handshake. If EAP peers in a deployment are provisioned with different signature schemes,
+for example ML-DSA and composite ML-DSA, the EAP server needs to support all of them.
+
+Pure post-quantum authentication suits deployments that can fully adopt post-quantum
+cryptography, or that have regulatory requirements for it {{I-D.ietf-uta-pqc-app}}.
+
+PQ/T hybrid authentication using composite signatures {{I-D.ietf-tls-composite-mldsa}} may
+be preferred by deployments seeking defense in depth during the transition, so that
+authentication remains secure as long as either component algorithm remains unbroken.
+While ML-DSA implementations mature, the traditional component protects against
+vulnerabilities in ML-DSA, such as implementation bugs. If a CRQC later breaks the
+traditional component, impersonation remains infeasible as long as the ML-DSA component
+remains secure, which by then is expected to rest on mature implementations.
 
 # Security Considerations
 
