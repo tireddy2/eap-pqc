@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-27T04:31:35.332870+00:00",
+  "timestamp": "2026-10-29T05:16:21.404617+00:00",
   "repo": "tireddy2/eap-pqc",
   "labels": [
     {
@@ -266,24 +266,26 @@
       "id": "PR_kwDOPGMMNc8AAAABKjHrAw",
       "title": "Address comments from the WG",
       "url": "https://github.com/tireddy2/eap-pqc/pull/8",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "tireddy2",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-10-25T07:51:07Z",
-      "updatedAt": "2026-10-25T07:51:07Z",
+      "updatedAt": "2026-10-28T06:18:02Z",
       "baseRepository": "tireddy2/eap-pqc",
       "baseRefName": "main",
       "baseRefOid": "f5fdc584ce62beb8694ef79370d1c961f034e864",
       "headRepository": "tireddy2/eap-pqc",
       "headRefName": "tireddy2-patch-7",
       "headRefOid": "cfe2c7657c6681e9dc20d48d3bfc81e194cdc9bc",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-28T06:18:02Z",
+      "mergedAt": "2026-10-28T06:18:02Z",
+      "mergedBy": "tireddy2",
+      "mergeCommit": {
+        "oid": "4b5caaf1b5c911e59222f4768d400906ecef67b5"
+      },
       "comments": [],
       "reviews": []
     }
