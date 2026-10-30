@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                         29 October 2026
-Expires: 2 May 2027
+Intended status: Standards Track                         30 October 2026
+Expires: 3 May 2027
 
 
            Post-Quantum Enhancements to TLS-Based EAP Methods
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2027.
+   This Internet-Draft will expire on 3 May 2027.
 
 Copyright Notice
 
@@ -251,12 +251,12 @@ Table of Contents
    points (APs) in real time, potentially deceiving users into revealing
    credentials or connecting to rogue networks.
 
-   To mitigate these risks, TLS-based EAP deployments that require
-   resistance to future CRQCs MUST support at least one post-quantum or
-   PQ/T hybrid signature scheme registered in the "TLS SignatureScheme"
-   registry for authentication.  ML-DSA [FIPS204] is specified for use
-   in X.509 certificates in [RFC9881] and for authentication in TLS 1.3
-   in [I-D.ietf-tls-mldsa].
+   To mitigate these risks, in deployments that require resistance to
+   future CRQCs, EAP peers and EAP servers MUST support at least one
+   post-quantum or PQ/T hybrid signature scheme registered in the "TLS
+   SignatureScheme" registry for authentication.  ML-DSA [FIPS204] is
+   specified for use in X.509 certificates in [RFC9881] and for
+   authentication in TLS 1.3 in [I-D.ietf-tls-mldsa].
 
    This document does not mandate a specific signature scheme or
    parameter set.  The Recommended column of the "TLS SignatureScheme"
@@ -426,9 +426,7 @@ Table of Contents
    administrator selects the certificate algorithm, the CA issues
    certificates accordingly, and both EAP servers and EAP peers are
    provisioned to match.  The signature scheme is then negotiated in the
-   TLS handshake.  If EAP peers in a deployment are provisioned with
-   different signature schemes, for example ML-DSA and composite ML-DSA,
-   the EAP server needs to support all of them.
+   TLS handshake.
 
    Pure post-quantum authentication suits deployments that can fully
    adopt post-quantum cryptography, or that have regulatory requirements
@@ -444,6 +442,18 @@ Table of Contents
    component, impersonation remains infeasible as long as the ML-DSA
    component remains secure, which by then is expected to rest on mature
    implementations.
+
+   Where EAP peers are not centrally managed, for example where users
+   configure their own devices from a provided profile, the operator has
+   no control over which signature schemes the EAP peers support, and
+   cannot update them if a vulnerability is found.  Such deployments
+   benefit significantly from PQ/T hybrid authentication, which provides
+   an immediate safeguard against vulnerabilities in ML-DSA
+   [I-D.ietf-uta-pqc-app].
+
+   An EAP peer or EAP server that accepts both ML-DSA and composite ML-
+   DSA is only as strong as ML-DSA.  Deployments that choose composite
+   ML-DSA for defense in depth need to disable ML-DSA.
 
 7.  Security Considerations
 
@@ -475,13 +485,6 @@ Acknowledgements
 References
 
 Normative References
-
-   [I-D.ietf-tls-mldsa]
-              Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
-              DSA in TLS 1.3", Work in Progress, Internet-Draft, draft-
-              ietf-tls-mldsa-06, 11 September 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              mldsa-06>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -571,6 +574,13 @@ Informative References
               00, 23 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
               composite-mldsa-00>.
+
+   [I-D.ietf-tls-mldsa]
+              Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
+              DSA in TLS 1.3", Work in Progress, Internet-Draft, draft-
+              ietf-tls-mldsa-06, 11 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
+              mldsa-06>.
 
    [I-D.ietf-uta-pqc-app]
               Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
