@@ -49,9 +49,9 @@ normative:
   RFC8295:
   RFC8951:
   RFC9427:
-  I-D.ietf-tls-mldsa:
 
 informative:
+  I-D.ietf-tls-mldsa:
   RFC5281:
   RFC9930:
   RFC8879:
@@ -244,9 +244,9 @@ private key within the certificate validity period could impersonate access poin
 in real time, potentially deceiving users into revealing credentials or connecting to
 rogue networks.
 
-To mitigate these risks, TLS-based EAP deployments that require resistance to future
-CRQCs MUST support at least one post-quantum or PQ/T hybrid signature scheme registered
-in the "TLS SignatureScheme" registry for authentication. ML-DSA {{FIPS204}} is specified for use in X.509
+To mitigate these risks, in deployments that require resistance to future CRQCs, EAP
+peers and EAP servers MUST support at least one post-quantum or PQ/T hybrid signature
+scheme registered in the "TLS SignatureScheme" registry for authentication. ML-DSA {{FIPS204}} is specified for use in X.509
 certificates in {{RFC9881}} and for authentication in TLS 1.3 in {{I-D.ietf-tls-mldsa}}.
 
 This document does not mandate a specific signature scheme or parameter set. The
@@ -385,8 +385,7 @@ document.
 TLS-based EAP is typically deployed in managed environments. The administrator selects the
 certificate algorithm, the CA issues certificates accordingly, and both EAP servers and EAP
 peers are provisioned to match. The signature scheme is then negotiated in the TLS
-handshake. If EAP peers in a deployment are provisioned with different signature schemes,
-for example ML-DSA and composite ML-DSA, the EAP server needs to support all of them.
+handshake.
 
 Pure post-quantum authentication suits deployments that can fully adopt post-quantum
 cryptography, or that have regulatory requirements for it {{I-D.ietf-uta-pqc-app}}.
@@ -398,6 +397,16 @@ While ML-DSA implementations mature, the traditional component protects against
 vulnerabilities in ML-DSA, such as implementation bugs. If a CRQC later breaks the
 traditional component, impersonation remains infeasible as long as the ML-DSA component
 remains secure, which by then is expected to rest on mature implementations.
+
+Where EAP peers are not centrally managed, for example where users configure their own
+devices from a provided profile, the operator has no control over which signature schemes
+the EAP peers support, and cannot update them if a vulnerability is found. Such deployments
+benefit significantly from PQ/T hybrid authentication, which provides an immediate
+safeguard against vulnerabilities in ML-DSA {{I-D.ietf-uta-pqc-app}}.
+
+An EAP peer or EAP server that accepts both ML-DSA and composite ML-DSA is only as strong
+as ML-DSA. Deployments that choose composite ML-DSA for defense in depth need to disable
+ML-DSA.
 
 # Security Considerations
 
