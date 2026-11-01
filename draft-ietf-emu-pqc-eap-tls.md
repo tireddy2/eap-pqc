@@ -277,12 +277,12 @@ environments. {{ext-extn}} describes mitigations.
 
 # EST Integration {#ext-extn}
 
-The EAP client is expected to validate the certificate presented by the EAP server using
+The EAP peer is expected to validate the certificate presented by the EAP server using
 a trust anchor that is provisioned out-of-band prior to authentication (e.g., using
 EST). The intermediate certificates are provided by the EAP server during the TLS
-handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
+handshake. The EAP peer relies solely on the pre-provisioned trust anchor to build and
 validate the certificate chain. This model assumes a managed deployment environment with
-explicitly configured trust relationships between the EAP client and EAP server.
+explicitly configured trust relationships between the EAP peer and EAP server.
 
 Certificate compression {{RFC8879}} provides limited benefit for certificates containing
 large high-entropy post-quantum public keys and signatures, and session resumption
@@ -294,16 +294,16 @@ chains due to post-quantum (PQ) or composite certificates, this document specifi
 optimization that leverages the Enrollment over Secure Transport (EST) protocol
 {{RFC7030}}, extended by {{RFC8295}}. Specifically, it allows intermediate certificates
 to be retrieved in advance by using EST, thereby avoiding the need to transmit them
-during each TLS handshake. The optimization applies only when every EAP client that
+during each TLS handshake. The optimization applies only when every EAP peer that
 authenticates to the EAP server has retrieved its intermediate certificates as part of
 provisioning.
 
 For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
 optimization described in this section applies to the certificates used in the outer TLS
-tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.
+tunnel. The EST pre-fetching of EAP peer intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.
 
 This section defines extensions to EST to support retrieval of the certificate chain used
-by an EAP server and EAP clients. The first extension enables EAP clients to retrieve the
+by an EAP server and EAP peers. The first extension enables EAP peers to retrieve the
 intermediate certificates required to build a certification path to the EAP server's
 end-entity certificate.
 
@@ -314,31 +314,31 @@ GET /.well-known/est/eapservercertchain
 ~~~
 
 The '/eapservercertchain' is intended for informational retrieval only and does not
-require client authentication. It allows clients to retrieve the intermediate certificate
+require client authentication. It allows EAP peers to retrieve the intermediate certificate
 chain that the EAP server presents during TLS handshakes. This request is performed
 using the HTTPS protocol. The EST server MUST support requests without requiring client
 authentication. The EST server MUST provide the intermediate
 certificates of the CAs that issue EAP server certificates.
 
 The second extension enables EAP servers to retrieve the intermediate certificates
-required to build a certification path to the EAP clients' end-entity certificates. Rather than relying on static
-configuration, the EAP server can dynamically fetch the client's intermediate certificate
+required to build a certification path to the EAP peers' end-entity certificates. Rather than relying on static
+configuration, the EAP server can dynamically fetch the EAP peer's intermediate certificate
 chain from a trusted EST server within the same administrative domain.
 
 A new path component is defined under the EST well-known URI:
 
 ~~~
-GET /.well-known/est/eapclientcertchain
+GET /.well-known/est/eappeercertchain
 ~~~
 
-The '/eapclientcertchain' is intended for informational retrieval only and does not
+The '/eappeercertchain' is intended for informational retrieval only and does not
 require client authentication. It allows the EAP server to retrieve the intermediate
-certificate chain that the EAP clients present during TLS handshakes. This request is
+certificate chain that the EAP peers present during TLS handshakes. This request is
 performed using the HTTPS protocol. The EST server MUST support requests without
 requiring client authentication. The EST server MUST provide the intermediate
-certificates of the CAs that issue EAP client certificates.
+certificates of the CAs that issue EAP peer certificates.
 
-The response to '/eapservercertchain' and '/eapclientcertchain' uses the format of the
+The response to '/eapservercertchain' and '/eappeercertchain' uses the format of the
 '/cacerts' response defined in {{Section 4.1.3 of RFC7030}}, as updated by {{RFC8951}},
 and carries only intermediate CA certificates.
 
@@ -346,11 +346,11 @@ Retrieved intermediate certificates are used, together with any certificates rec
 the TLS handshake, to construct a certification path from the end-entity certificate to
 the pre-provisioned trust anchor. Where an EAP server has certificates
 issued by more than one CA, the retrieved intermediate certificates cover all of them, and
-the EAP client selects those needed to construct a path for the certificate presented in
+the EAP peer selects those needed to construct a path for the certificate presented in
 the handshake. If no valid path can be constructed, authentication fails as for any other
 certificate validation failure.
 
-EAP clients and servers MUST authenticate the EST server using a trust anchor obtained
+EAP peers and EAP servers MUST authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
 via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
 BRSKI {{RFC8995}}, EST {{RFC7030}}, or out-of-band provisioning. The choice of
@@ -358,16 +358,16 @@ bootstrapping mechanism is a deployment decision and is out of scope for this do
 Certificate chains retrieved from an unauthenticated or untrusted EST server MUST NOT be
 used for TLS chain validation.
 
-EAP servers and clients are RECOMMENDED to cache retrieved certificate chains. They
+EAP servers and EAP peers are RECOMMENDED to cache retrieved certificate chains. They
 SHOULD re-fetch them periodically, following HTTP caching rules {{RFC9111}}, and before
 cached intermediate certificates expire.
 
-EAP clients MAY omit intermediate certificates from the TLS handshake only if they have
-been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
-configuration is present, the EAP client MUST include the full certificate chain in the
+EAP peers MAY omit intermediate certificates from the TLS handshake only if they have
+been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP peer and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
+configuration is present, the EAP peer MUST include the full certificate chain in the
 TLS handshake. Similarly, an EAP server MAY omit intermediate certificates from the TLS
 handshake only if it has been explicitly configured by the administrator to do so.
-Administrators are advised to ensure that clients in the deployment have retrieved the
+Administrators are advised to ensure that EAP peers in the deployment have retrieved the
 server's intermediate certificates via EST as part of their provisioning process before
 enabling this configuration.
 
@@ -422,11 +422,11 @@ carefully evaluated and taken into account for all TLS-based EAP deployments.
 
 This document defines two new path components under the EST well-known URI
 '/.well-known/est/', following the extension mechanism established by {{RFC8295}}:
-'/eapservercertchain' and '/eapclientcertchain'. As these are sub-paths under the
+'/eapservercertchain' and '/eappeercertchain'. As these are sub-paths under the
 already-registered '/.well-known/est/' prefix defined in {{RFC7030}}, no new IANA
 registry entries are required.
 
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael Richardson, Junjun Chen, and Guilin Wang for the discussion and comments.
+Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael Richardson, Junjun Chen, Guilin Wang, and Heikki Vatiainen for the discussion and comments.
