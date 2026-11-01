@@ -1393,12 +1393,12 @@ environments. <a href="#ext-extn" class="auto internal xref">Section 5</a> descr
       <h2 id="name-est-integration">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-est-integration" class="section-name selfRef">EST Integration</a>
       </h2>
-<p id="section-5-1">The EAP client is expected to validate the certificate presented by the EAP server using
+<p id="section-5-1">The EAP peer is expected to validate the certificate presented by the EAP server using
 a trust anchor that is provisioned out-of-band prior to authentication (e.g., using
 EST). The intermediate certificates are provided by the EAP server during the TLS
-handshake. The EAP client relies solely on the pre-provisioned trust anchor to build and
+handshake. The EAP peer relies solely on the pre-provisioned trust anchor to build and
 validate the certificate chain. This model assumes a managed deployment environment with
-explicitly configured trust relationships between the EAP client and EAP server.<a href="#section-5-1" class="pilcrow">¶</a></p>
+explicitly configured trust relationships between the EAP peer and EAP server.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <p id="section-5-2">Certificate compression <span>[<a href="#RFC8879" class="cite xref">RFC8879</a>]</span> provides limited benefit for certificates containing
 large high-entropy post-quantum public keys and signatures, and session resumption
 requires a prior full handshake. Out-of-band provisioning of the intermediate chain can
@@ -1408,14 +1408,14 @@ chains due to post-quantum (PQ) or composite certificates, this document specifi
 optimization that leverages the Enrollment over Secure Transport (EST) protocol
 <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, extended by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>. Specifically, it allows intermediate certificates
 to be retrieved in advance by using EST, thereby avoiding the need to transmit them
-during each TLS handshake. The optimization applies only when every EAP client that
+during each TLS handshake. The optimization applies only when every EAP peer that
 authenticates to the EAP server has retrieved its intermediate certificates as part of
 provisioning.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <p id="section-5-4">For EAP methods that use TLS as an outer tunnel (e.g., PEAP and TEAP), the EST
 optimization described in this section applies to the certificates used in the outer TLS
-tunnel. The EST pre-fetching of client intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-4" class="pilcrow">¶</a></p>
+tunnel. The EST pre-fetching of EAP peer intermediate certificates is relevant only when mutual TLS authentication is used. This is always the case for EAP-TLS, and optionally the case for EAP-TTLS and TEAP when client certificate authentication is used in the outer tunnel.<a href="#section-5-4" class="pilcrow">¶</a></p>
 <p id="section-5-5">This section defines extensions to EST to support retrieval of the certificate chain used
-by an EAP server and EAP clients. The first extension enables EAP clients to retrieve the
+by an EAP server and EAP peers. The first extension enables EAP peers to retrieve the
 intermediate certificates required to build a certification path to the EAP server's
 end-entity certificate.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">A new path component is defined under the EST well-known URI:<a href="#section-5-6" class="pilcrow">¶</a></p>
@@ -1425,53 +1425,53 @@ GET /.well-known/est/eapservercertchain
 </pre><a href="#section-5-7" class="pilcrow">¶</a>
 </div>
 <p id="section-5-8">The '/eapservercertchain' is intended for informational retrieval only and does not
-require client authentication. It allows clients to retrieve the intermediate certificate
+require client authentication. It allows EAP peers to retrieve the intermediate certificate
 chain that the EAP server presents during TLS handshakes. This request is performed
 using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without requiring client
 authentication. The EST server <span class="bcp14">MUST</span> provide the intermediate
 certificates of the CAs that issue EAP server certificates.<a href="#section-5-8" class="pilcrow">¶</a></p>
 <p id="section-5-9">The second extension enables EAP servers to retrieve the intermediate certificates
-required to build a certification path to the EAP clients' end-entity certificates. Rather than relying on static
-configuration, the EAP server can dynamically fetch the client's intermediate certificate
+required to build a certification path to the EAP peers' end-entity certificates. Rather than relying on static
+configuration, the EAP server can dynamically fetch the EAP peer's intermediate certificate
 chain from a trusted EST server within the same administrative domain.<a href="#section-5-9" class="pilcrow">¶</a></p>
 <p id="section-5-10">A new path component is defined under the EST well-known URI:<a href="#section-5-10" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5-11">
 <pre>
-GET /.well-known/est/eapclientcertchain
+GET /.well-known/est/eappeercertchain
 </pre><a href="#section-5-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5-12">The '/eapclientcertchain' is intended for informational retrieval only and does not
+<p id="section-5-12">The '/eappeercertchain' is intended for informational retrieval only and does not
 require client authentication. It allows the EAP server to retrieve the intermediate
-certificate chain that the EAP clients present during TLS handshakes. This request is
+certificate chain that the EAP peers present during TLS handshakes. This request is
 performed using the HTTPS protocol. The EST server <span class="bcp14">MUST</span> support requests without
 requiring client authentication. The EST server <span class="bcp14">MUST</span> provide the intermediate
-certificates of the CAs that issue EAP client certificates.<a href="#section-5-12" class="pilcrow">¶</a></p>
-<p id="section-5-13">The response to '/eapservercertchain' and '/eapclientcertchain' uses the format of the
+certificates of the CAs that issue EAP peer certificates.<a href="#section-5-12" class="pilcrow">¶</a></p>
+<p id="section-5-13">The response to '/eapservercertchain' and '/eappeercertchain' uses the format of the
 '/cacerts' response defined in <span><a href="https://rfc-editor.org/rfc/rfc7030#section-4.1.3" class="relref">Section 4.1.3</a> of [<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, as updated by <span>[<a href="#RFC8951" class="cite xref">RFC8951</a>]</span>,
 and carries only intermediate CA certificates.<a href="#section-5-13" class="pilcrow">¶</a></p>
 <p id="section-5-14">Retrieved intermediate certificates are used, together with any certificates received in
 the TLS handshake, to construct a certification path from the end-entity certificate to
 the pre-provisioned trust anchor. Where an EAP server has certificates
 issued by more than one CA, the retrieved intermediate certificates cover all of them, and
-the EAP client selects those needed to construct a path for the certificate presented in
+the EAP peer selects those needed to construct a path for the certificate presented in
 the handshake. If no valid path can be constructed, authentication fails as for any other
 certificate validation failure.<a href="#section-5-14" class="pilcrow">¶</a></p>
-<p id="section-5-15">EAP clients and servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
+<p id="section-5-15">EAP peers and EAP servers <span class="bcp14">MUST</span> authenticate the EST server using a trust anchor obtained
 via a suitable bootstrapping mechanism before retrieving intermediate certificate chains
 via HTTPS. Various bootstrapping mechanisms exist for establishing this trust, such as
 BRSKI <span>[<a href="#RFC8995" class="cite xref">RFC8995</a>]</span>, EST <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, or out-of-band provisioning. The choice of
 bootstrapping mechanism is a deployment decision and is out of scope for this document.
 Certificate chains retrieved from an unauthenticated or untrusted EST server <span class="bcp14">MUST NOT</span> be
 used for TLS chain validation.<a href="#section-5-15" class="pilcrow">¶</a></p>
-<p id="section-5-16">EAP servers and clients are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains. They
+<p id="section-5-16">EAP servers and EAP peers are <span class="bcp14">RECOMMENDED</span> to cache retrieved certificate chains. They
 <span class="bcp14">SHOULD</span> re-fetch them periodically, following HTTP caching rules <span>[<a href="#RFC9111" class="cite xref">RFC9111</a>]</span>, and before
 cached intermediate certificates expire.<a href="#section-5-16" class="pilcrow">¶</a></p>
-<p id="section-5-17">EAP clients <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
-been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP client and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
-configuration is present, the EAP client <span class="bcp14">MUST</span> include the full certificate chain in the
+<p id="section-5-17">EAP peers <span class="bcp14">MAY</span> omit intermediate certificates from the TLS handshake only if they have
+been explicitly configured by the administrator to do so. Such configuration is recommended only in deployments where both the EAP peer and EAP server support this specification and have completed EST pre-fetching as part of provisioning. If no such
+configuration is present, the EAP peer <span class="bcp14">MUST</span> include the full certificate chain in the
 TLS handshake. Similarly, an EAP server <span class="bcp14">MAY</span> omit intermediate certificates from the TLS
 handshake only if it has been explicitly configured by the administrator to do so.
-Administrators are advised to ensure that clients in the deployment have retrieved the
+Administrators are advised to ensure that EAP peers in the deployment have retrieved the
 server's intermediate certificates via EST as part of their provisioning process before
 enabling this configuration.<a href="#section-5-17" class="pilcrow">¶</a></p>
 <p id="section-5-18">EST is one transport for retrieving intermediate certificates out of band. Device
@@ -1531,7 +1531,7 @@ carefully evaluated and taken into account for all TLS-based EAP deployments.<a 
       </h2>
 <p id="section-8-1">This document defines two new path components under the EST well-known URI
 '/.well-known/est/', following the extension mechanism established by <span>[<a href="#RFC8295" class="cite xref">RFC8295</a>]</span>:
-'/eapservercertchain' and '/eapclientcertchain'. As these are sub-paths under the
+'/eapservercertchain' and '/eappeercertchain'. As these are sub-paths under the
 already-registered '/.well-known/est/' prefix defined in <span>[<a href="#RFC7030" class="cite xref">RFC7030</a>]</span>, no new IANA
 registry entries are required.<a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
@@ -1541,7 +1541,7 @@ registry entries are required.<a href="#section-8-1" class="pilcrow">¶</a></p>
       <h2 id="name-acknowledgements">
 <a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
       </h2>
-<p id="section-9-1">Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael Richardson, Junjun Chen, and Guilin Wang for the discussion and comments.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">Thanks to John Mattsson, Hannes Tschofenig, Alan DeKok, Michael Richardson, Junjun Chen, Guilin Wang, and Heikki Vatiainen for the discussion and comments.<a href="#section-9-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
