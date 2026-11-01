@@ -4,8 +4,8 @@
 
 EAP Method Update                                               T. Reddy
 Internet-Draft                                                     Nokia
-Intended status: Standards Track                         28 October 2026
-Expires: 1 May 2027
+Intended status: Standards Track                         1 November 2026
+Expires: 5 May 2027
 
 
            Post-Quantum Enhancements to TLS-Based EAP Methods
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 May 2027.
+   This Internet-Draft will expire on 5 May 2027.
 
 Copyright Notice
 
@@ -71,8 +71,9 @@ Table of Contents
    3.  Data Confidentiality in TLS-Based EAP Methods
    4.  Post-Quantum Authentication in TLS-Based EAP Methods
    5.  EST Integration
-   6.  Security Considerations
-   7.  IANA Considerations
+   6.  Operational Considerations
+   7.  Security Considerations
+   8.  IANA Considerations
    Acknowledgements
    References
      Normative References
@@ -250,26 +251,23 @@ Table of Contents
    points (APs) in real time, potentially deceiving users into revealing
    credentials or connecting to rogue networks.
 
-   To mitigate these risks, TLS-based EAP deployments that require
-   resistance to future CRQCs MUST support at least one post-quantum or
-   PQ/T hybrid signature scheme registered in the "TLS SignatureScheme"
-   registry for authentication.  ML-DSA [FIPS204] is specified for use
-   in X.509 certificates in [RFC9881] and for authentication in TLS 1.3
-   in [I-D.ietf-tls-mldsa].
+   To mitigate these risks, in deployments that require resistance to
+   future CRQCs, EAP peers and EAP servers MUST support at least one
+   post-quantum or PQ/T hybrid signature scheme registered in the "TLS
+   SignatureScheme" registry for authentication.  ML-DSA [FIPS204] is
+   specified for use in X.509 certificates in [RFC9881] and for
+   authentication in TLS 1.3 in [I-D.ietf-tls-mldsa].
 
    This document does not mandate a specific signature scheme or
    parameter set.  The Recommended column of the "TLS SignatureScheme"
    registry, defined in [RFC9847], records current IETF guidance on the
    use of registered schemes.
 
-   PQ/T hybrid authentication using composite signatures may be
-   preferred by deployments seeking defense in depth during the
-   transition, so that authentication remains secure as long as either
-   component algorithm remains unbroken.  Composite ML-DSA is specified
-   for X.509 in [I-D.ietf-lamps-pq-composite-sigs] and for TLS 1.3 in
-   [I-D.reddy-tls-composite-mldsa].  The choice between pure post-
-   quantum and PQ/T hybrid authentication is a deployment decision and
-   is out of scope for this document.
+   Composite ML-DSA is specified for X.509 in
+   [I-D.ietf-lamps-pq-composite-sigs] and for TLS 1.3 in
+   [I-D.ietf-tls-composite-mldsa].  The choice between pure post-quantum
+   and PQ/T hybrid authentication is a deployment decision; Section 6
+   discusses the considerations.
 
    The relatively large SLH-DSA [FIPS205] signatures may make SLH-DSA
    less suitable for TLS-based EAP deployments, particularly where
@@ -422,7 +420,42 @@ Table of Contents
    for administrator configuration.  Such a mechanism is considered a
    possible future solution but is out of scope for this document.
 
-6.  Security Considerations
+6.  Operational Considerations
+
+   TLS-based EAP is typically deployed in managed environments.  The
+   administrator selects the certificate algorithm, the CA issues
+   certificates accordingly, and both EAP servers and EAP peers are
+   provisioned to match.  The signature scheme is then negotiated in the
+   TLS handshake.
+
+   Pure post-quantum authentication suits deployments that can fully
+   adopt post-quantum cryptography, or that have regulatory requirements
+   for it [I-D.ietf-uta-pqc-app].
+
+   PQ/T hybrid authentication using composite signatures
+   [I-D.ietf-tls-composite-mldsa] may be preferred by deployments
+   seeking defense in depth during the transition, so that
+   authentication remains secure as long as either component algorithm
+   remains unbroken.  While ML-DSA implementations mature, the
+   traditional component protects against vulnerabilities in ML-DSA,
+   such as implementation bugs.  If a CRQC later breaks the traditional
+   component, impersonation remains infeasible as long as the ML-DSA
+   component remains secure, which by then is expected to rest on mature
+   implementations.
+
+   Where EAP peers are not centrally managed, for example where users
+   configure their own devices from a provided profile, the operator has
+   no control over which signature schemes the EAP peers support, and
+   cannot update them if a vulnerability is found.  Such deployments
+   benefit significantly from PQ/T hybrid authentication, which provides
+   an immediate safeguard against vulnerabilities in ML-DSA
+   [I-D.ietf-uta-pqc-app].
+
+   An EAP peer or EAP server that accepts both ML-DSA and composite ML-
+   DSA is only as strong as ML-DSA.  Deployments that choose composite
+   ML-DSA for defense in depth need to disable ML-DSA.
+
+7.  Security Considerations
 
    The security considerations of [RFC7030] and [RFC8295] apply to the
    EST extensions defined in Section 5.  If an intermediate CA
@@ -434,7 +467,7 @@ Table of Contents
    [RFC9958] must be carefully evaluated and taken into account for all
    TLS-based EAP deployments.
 
-7.  IANA Considerations
+8.  IANA Considerations
 
    This document defines two new path components under the EST well-
    known URI '/.well-known/est/', following the extension mechanism
@@ -452,13 +485,6 @@ Acknowledgements
 References
 
 Normative References
-
-   [I-D.ietf-tls-mldsa]
-              Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
-              DSA in TLS 1.3", Work in Progress, Internet-Draft, draft-
-              ietf-tls-mldsa-06, 11 September 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              mldsa-06>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -541,20 +567,27 @@ Informative References
               <https://datatracker.ietf.org/doc/html/draft-ietf-lamps-
               pq-composite-sigs-19>.
 
+   [I-D.ietf-tls-composite-mldsa]
+              Reddy.K, T., Hollebeek, T., Gray, J., Fluhrer, S., and D.
+              Van Geest, "Use of Composite ML-DSA in TLS 1.3", Work in
+              Progress, Internet-Draft, draft-ietf-tls-composite-mldsa-
+              00, 23 October 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
+              composite-mldsa-00>.
+
+   [I-D.ietf-tls-mldsa]
+              Hollebeek, T., Schmieg, S., and B. Westerbaan, "Use of ML-
+              DSA in TLS 1.3", Work in Progress, Internet-Draft, draft-
+              ietf-tls-mldsa-06, 11 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
+              mldsa-06>.
+
    [I-D.ietf-uta-pqc-app]
               Reddy.K, T. and H. Tschofenig, "Post-Quantum Cryptography
               Recommendations for TLS-based Applications", Work in
               Progress, Internet-Draft, draft-ietf-uta-pqc-app-03, 4
               July 2026, <https://datatracker.ietf.org/doc/html/draft-
               ietf-uta-pqc-app-03>.
-
-   [I-D.reddy-tls-composite-mldsa]
-              Reddy.K, T., Hollebeek, T., Gray, J., Fluhrer, S., and D.
-              Van Geest, "Use of Composite ML-DSA in TLS 1.3", Work in
-              Progress, Internet-Draft, draft-reddy-tls-composite-mldsa-
-              12, 31 August 2026,
-              <https://datatracker.ietf.org/doc/html/draft-reddy-tls-
-              composite-mldsa-12>.
 
    [MS-PEAP]  Microsoft, "[MS-PEAP]: Protected Extensible Authentication
               Protocol (PEAP)", n.d., <https://learn.microsoft.com/en-
